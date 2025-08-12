@@ -24,9 +24,36 @@ profile.cov
 go.work
 go.work.sum
 
-# env file
+# Environment files (NEVER commit these!)
 .env
+.env.local
+.env.production
+.env.development
 
-# Editor/IDE
-# .idea/
-# .vscode/
+# Build artifacts
+bin/
+dist/
+build/
+
+# IDE/Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
