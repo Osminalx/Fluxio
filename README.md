@@ -1,152 +1,163 @@
 # 🚀 Fluxio API
 
-API de autenticación y gestión de usuarios construida con Go, GORM, JWT y PostgreSQL.
+Personal Finances API built with Go, GORM, JWT, and PostgreSQL.
 
-## ✨ Características
+## ✨ Features
 
-- 🔐 Autenticación JWT
-- 🗄️ Base de datos PostgreSQL con GORM
-- 📚 Documentación automática con Swagger
-- 🐳 Contenedores Docker/Podman
-- 🆔 IDs UUID para mayor seguridad
-- 🔒 Middleware de autenticación
-- 🧪 Health checks integrados
+- 🔐 JWT Authentication
+- 🗄️ PostgreSQL database with GORM ORM
+- 📚 Automatic API documentation with Swagger
+- 🐳 Docker/Podman containerization
+- 🆔 UUID IDs for enhanced security
+- 🔒 Authentication middleware
+- 🧪 Built-in health checks
+- 🚀 Hybrid development setup (PostgreSQL in containers, Go locally)
 
-## 🛠️ Tecnologías
+## 🛠️ Technologies
 
 - **Backend**: Go 1.24+
-- **Base de datos**: PostgreSQL 15
+- **Database**: PostgreSQL 15
 - **ORM**: GORM
-- **Autenticación**: JWT
-- **Documentación**: Swagger/OpenAPI
-- **Contenedores**: Docker/Podman
+- **Authentication**: JWT
+- **Documentation**: Swagger/OpenAPI
+- **Containers**: Docker/Podman
 
-## 🚀 Despliegue Rápido con Podman
+## 🚀 Quick Start with Podman
 
-### Prerrequisitos
+### Prerequisites
 
-1. **Podman** instalado
-2. **podman-compose** instalado
+1. **Podman** installed
+2. **podman-compose** installed
 
 ```bash
-# En Fedora/RHEL
+# On Fedora/RHEL
 sudo dnf install podman
 
-# En Ubuntu/Debian
+# On Ubuntu/Debian
 sudo apt install podman
 
-# Instalar podman-compose
+# Install podman-compose
 pip3 install podman-compose
 ```
 
-### Despliegue Automático
+### Automatic Deployment
 
 ```bash
-# Dar permisos de ejecución
+# Make scripts executable
 chmod +x deploy.sh
 
-# Ejecutar despliegue
+# Run deployment
 ./deploy.sh
 ```
 
-### Despliegue Manual
+### Manual Deployment
 
 ```bash
-# Construir y ejecutar
+# Build and run
 podman-compose up --build -d
 
-# Ver logs
+# View logs
 podman-compose logs -f
 
-# Verificar estado
+# Check status
 podman-compose ps
 
-# Detener servicios
+# Stop services
 podman-compose down
 ```
 
-## 🛠️ Desarrollo Local
+## 🛠️ Local Development
 
-### Prerrequisitos
+### Prerequisites
 
-1. **Go 1.24+** instalado
-2. **PostgreSQL** ejecutándose en localhost:5432
-3. **Base de datos 'fluxio'** creada
+1. **Go 1.24+** installed
+2. **PostgreSQL** running on localhost:5432
+3. **Database 'fluxio'** created
 
-### Ejecutar en Desarrollo
+### Run in Development Mode
 
 ```bash
-# Dar permisos de ejecución
+# Make scripts executable
 chmod +x dev.sh
 
-# Ejecutar en modo desarrollo
+# Run in development mode
 ./dev.sh
 ```
 
-### Desarrollo Manual
+### Hybrid Development (Recommended)
 
 ```bash
-# Instalar dependencias
+# Make script executable
+chmod +x dev-hybrid.sh
+
+# Run hybrid mode (PostgreSQL in Podman, Go locally)
+./dev-hybrid.sh
+```
+
+### Manual Development
+
+```bash
+# Install dependencies
 go mod tidy
 
-# Generar documentación Swagger
+# Generate Swagger documentation
 swag init -g cmd/server/main.go
 
-# Ejecutar
+# Run
 go run cmd/server/main.go
 ```
 
-## 📚 Endpoints de la API
+## 📚 API Endpoints
 
-### Públicos
-- `GET /hello` - Endpoint de prueba
-- `POST /auth/register` - Registrar usuario
-- `POST /auth/login` - Iniciar sesión
+### Public
+- `GET /hello` - Test endpoint
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User login
 
-### Protegidos (requieren JWT)
-- `GET /protected` - Endpoint protegido
+### Protected (require JWT)
+- `GET /protected` - Protected endpoint
 
-## 🔐 Autenticación
+## 🔐 Authentication
 
-### 1. Registrar Usuario
+### 1. Register User
 ```bash
 curl -X POST http://localhost:8080/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "usuario@ejemplo.com",
-    "password": "contraseña123",
-    "name": "Juan Pérez"
+    "email": "user@example.com",
+    "password": "password123",
+    "name": "John Doe"
   }'
 ```
 
-### 2. Iniciar Sesión
+### 2. Login
 ```bash
 curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "usuario@ejemplo.com",
-    "password": "contraseña123"
+    "email": "user@example.com",
+    "password": "password123"
   }'
 ```
 
-### 3. Usar Endpoint Protegido
+### 3. Use Protected Endpoint
 ```bash
 curl -X GET http://localhost:8080/protected \
-  -H "Authorization: Bearer TU_TOKEN_JWT_AQUI"
+  -H "Authorization: Bearer YOUR_JWT_TOKEN_HERE"
 ```
 
-## 📖 Documentación Swagger
+## 📖 Swagger Documentation
 
-Una vez que la aplicación esté ejecutándose, accede a:
+Once the application is running, access:
 
 **🌐 Swagger UI**: http://localhost:8080/swagger/index.html
 
-## 🗄️ Base de Datos
+## 🗄️ Database
 
-### Estructura de Tablas
+### Table Structure
 
 ```sql
--- Tabla de usuarios
+-- Users table
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -158,7 +169,7 @@ CREATE TABLE users (
 );
 ```
 
-### Variables de Entorno
+### Environment Variables
 
 ```bash
 DATABASE_URL=postgres://postgres:123456@localhost:5432/fluxio?sslmode=disable
@@ -167,13 +178,13 @@ JWT_SECRET=your-super-secret-jwt-key-change-in-production
 
 ## 🐳 Docker
 
-### Construir Imagen
+### Build Image
 
 ```bash
 podman build -t fluxio:latest .
 ```
 
-### Ejecutar Contenedor
+### Run Container
 
 ```bash
 podman run -p 8080:8080 \
@@ -181,96 +192,98 @@ podman run -p 8080:8080 \
   fluxio:latest
 ```
 
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
 ```
 fluxio/
 ├── cmd/
 │   └── server/
-│       └── main.go          # Punto de entrada
+│       └── main.go          # Entry point
 ├── internal/
-│   ├── api/                 # Handlers HTTP
-│   ├── auth/                # Middleware de autenticación
-│   ├── db/                  # Conexión a base de datos
-│   ├── models/              # Modelos GORM
-│   └── services/            # Lógica de negocio
-├── docs/                    # Documentación Swagger
-├── Dockerfile               # Imagen Docker
-├── docker-compose.yml       # Orquestación
-├── deploy.sh                # Script de despliegue
-├── dev.sh                   # Script de desarrollo
-└── README.md               # Este archivo
+│   ├── api/                 # HTTP handlers
+│   ├── auth/                # Authentication middleware
+│   ├── db/                  # Database connection
+│   ├── models/              # GORM models
+│   └── services/            # Business logic
+├── docs/                    # Swagger documentation
+├── Dockerfile               # Docker image
+├── docker-compose.yml       # Full orchestration
+├── docker-compose.db.yml    # Database only
+├── deploy.sh                # Deployment script
+├── dev.sh                   # Local development script
+├── dev-hybrid.sh            # Hybrid development script
+└── README.md               # This file
 ```
 
-## 🔧 Comandos Útiles
+## 🔧 Useful Commands
 
 ```bash
-# Ver logs en tiempo real
+# View real-time logs
 podman-compose logs -f
 
-# Reiniciar servicios
+# Restart services
 podman-compose restart
 
-# Ver estado de servicios
+# Check service status
 podman-compose ps
 
-# Ejecutar comandos en contenedor
+# Execute commands in container
 podman-compose exec app sh
 podman-compose exec postgres psql -U postgres -d fluxio
 
-# Limpiar todo
+# Clean everything
 podman-compose down -v
 podman system prune -a
 ```
 
-## 🚨 Solución de Problemas
+## 🚨 Troubleshooting
 
-### Error de Conexión a Base de Datos
+### Database Connection Error
 ```bash
-# Verificar que PostgreSQL esté ejecutándose
+# Check if PostgreSQL is running
 podman-compose logs postgres
 
-# Verificar conectividad
+# Check connectivity
 podman-compose exec app wget -O- http://postgres:5432
 ```
 
-### Error de Permisos
+### Permission Issues
 ```bash
-# En sistemas SELinux
+# On SELinux systems
 sudo setsebool -P container_manage_cgroup 1
 ```
 
-### Puerto Ocupado
+### Port Already in Use
 ```bash
-# Ver qué está usando el puerto 8080
+# Check what's using port 8080
 sudo netstat -tulpn | grep :8080
 
-# Cambiar puerto en docker-compose.yml
+# Change port in docker-compose.yml
 ports:
   - "8081:8080"
 ```
 
-## 🤝 Contribuir
+## 🤝 Contributing
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Soporte
+## 🆘 Support
 
-Si tienes problemas o preguntas:
+If you have problems or questions:
 
-1. Revisa los logs: `podman-compose logs -f`
-2. Verifica el estado: `podman-compose ps`
-3. Revisa la documentación Swagger
-4. Abre un issue en GitHub
+1. Check the logs: `podman-compose logs -f`
+2. Verify status: `podman-compose ps`
+3. Check Swagger documentation
+4. Open an issue on GitHub
 
 ---
 
-**¡Disfruta desarrollando con Fluxio! 🎉**
+**Enjoy developing with Fluxio! 🎉**
