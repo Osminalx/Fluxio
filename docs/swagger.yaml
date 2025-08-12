@@ -1,0 +1,201 @@
+basePath: /
+definitions:
+  api.AuthResponse:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+  api.HelloResponse:
+    properties:
+      message:
+        example: ¡Hola desde Fluxio API!
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+  api.LoginRequest:
+    properties:
+      email:
+        example: usuario@ejemplo.com
+        type: string
+      password:
+        example: contraseña123
+        type: string
+    type: object
+  api.ProtectedResponse:
+    properties:
+      message:
+        example: ¡Acceso autorizado! Esta es una ruta protegida.
+        type: string
+      user:
+        $ref: '#/definitions/api.UserClaims'
+    type: object
+  api.RegisterRequest:
+    properties:
+      email:
+        example: usuario@ejemplo.com
+        type: string
+      name:
+        example: Juan Pérez
+        type: string
+      password:
+        example: contraseña123
+        type: string
+    type: object
+  api.UserClaims:
+    properties:
+      email:
+        example: usuario@ejemplo.com
+        type: string
+      user_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API de autenticación y gestión de usuarios con GORM y JWT
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Fluxio API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Autentica un usuario y devuelve un token JWT
+      parameters:
+      - description: Credenciales de login
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.AuthResponse'
+        "400":
+          description: Cuerpo de solicitud inválido
+          schema:
+            type: string
+        "401":
+          description: Credenciales inválidas
+          schema:
+            type: string
+        "500":
+          description: Error interno del servidor
+          schema:
+            type: string
+      summary: Iniciar sesión
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Crea una nueva cuenta de usuario
+      parameters:
+      - description: Datos del usuario
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.AuthResponse'
+        "400":
+          description: Cuerpo de solicitud inválido
+          schema:
+            type: string
+        "409":
+          description: Usuario ya existe
+          schema:
+            type: string
+        "500":
+          description: Error interno del servidor
+          schema:
+            type: string
+      summary: Registrar usuario
+      tags:
+      - auth
+  /hello:
+    get:
+      consumes:
+      - application/json
+      description: Endpoint público para probar la API
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.HelloResponse'
+      summary: Endpoint de prueba
+      tags:
+      - public
+  /protected:
+    get:
+      consumes:
+      - application/json
+      description: Endpoint que requiere autenticación JWT
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ProtectedResponse'
+        "401":
+          description: No autorizado
+          schema:
+            type: string
+        "500":
+          description: Error interno del servidor
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Endpoint protegido
+      tags:
+      - protected
+schemes:
+- http
+securityDefinitions:
+  bearerAuth:
+    description: Ingresa "Bearer" seguido de un espacio y el token JWT
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
