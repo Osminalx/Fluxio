@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Osminalx/fluxio/internal/services"
+	"github.com/Osminalx/fluxio/pkg/utils/logger"
 )
 
 type contextKey string
@@ -13,31 +14,49 @@ const UserContextKey contextKey = "user"
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Extract token from Authorization header
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			http.Error(w, "Missing Authorization Header", http.StatusUnauthorized)
+			logger.Warn("🚫 Intento de acceso sin token de autorización desde %s", r.RemoteAddr)
+			http.Error(w, "Authorization header required", http.StatusUnauthorized)
 			return
 		}
 
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		if tokenString == authHeader {
-			http.Error(w, "Invalid Authorization Header format", http.StatusUnauthorized)
+		// Check if it's a Bearer token
+		tokenParts := strings.Split(authHeader, " ")
+		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
+			logger.Warn("🚫 Formato de token inválido desde %s", r.RemoteAddr)
+			http.Error(w, "Invalid token format", http.StatusUnauthorized)
 			return
 		}
 
+		tokenString := tokenParts[1]
+
+		// Validate token
 		token, err := services.ValidateToken(tokenString)
-		if err != nil || !token.Valid {
-			http.Error(w, "Invalid Token", http.StatusUnauthorized)
+		if err != nil {
+			logger.Warn("🚫 Token inválido desde %s: %v", r.RemoteAddr, err)
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
 
-		// Extract claims and add user info to context
-		if claims, ok := token.Claims.(*services.Claims); ok {
-			ctx := context.WithValue(r.Context(), UserContextKey, claims)
-			next.ServeHTTP(w, r.WithContext(ctx))
-		} else {
+		// Extract claims from token
+		claims, ok := token.Claims.(*services.Claims)
+		if !ok {
+			logger.Warn("🚫 Claims inválidos desde %s", r.RemoteAddr)
 			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
 			return
 		}
+
+		// Log successful authentication
+		logger.Auth("ACCESS", claims.UserID, true, "Route: "+r.URL.Path)
+
+		// Store user claims in request context
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, "userClaims", claims)
+		r = r.WithContext(ctx)
+
+		// Call next handler
+		next.ServeHTTP(w, r)
 	})
 }

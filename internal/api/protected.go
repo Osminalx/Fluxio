@@ -29,7 +29,7 @@ type UserClaims struct {
 // @Success 200 {object} ProtectedResponse
 // @Failure 401 {string} string "No autorizado"
 // @Failure 500 {string} string "Error interno del servidor"
-// @Router /protected [get]
+// @Router /api/v1/protected [get]
 func ProtectedHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

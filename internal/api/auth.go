@@ -36,7 +36,7 @@ type AuthResponse struct {
 // @Failure 400 {string} string "Cuerpo de solicitud inválido"
 // @Failure 401 {string} string "Credenciales inválidas"
 // @Failure 500 {string} string "Error interno del servidor"
-// @Router /auth/login [post]
+// @Router /api/v1/auth/login [post]
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -86,7 +86,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {string} string "Cuerpo de solicitud inválido"
 // @Failure 409 {string} string "Usuario ya existe"
 // @Failure 500 {string} string "Error interno del servidor"
-// @Router /auth/register [post]
+// @Router /api/v1/auth/register [post]
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

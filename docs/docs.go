@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/login": {
+        "/api/v1/auth/login": {
             "post": {
                 "description": "Autentica un usuario y devuelve un token JWT",
                 "consumes": [
@@ -76,7 +76,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/register": {
+        "/api/v1/auth/register": {
             "post": {
                 "description": "Crea una nueva cuenta de usuario",
                 "consumes": [
@@ -128,7 +128,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/hello": {
+        "/api/v1/hello": {
             "get": {
                 "description": "Endpoint público para probar la API",
                 "consumes": [
@@ -151,7 +151,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/protected": {
+        "/api/v1/protected": {
             "get": {
                 "security": [
                     {

@@ -21,7 +21,7 @@
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
-        "/auth/login": {
+        "/api/v1/auth/login": {
             "post": {
                 "description": "Autentica un usuario y devuelve un token JWT",
                 "consumes": [
@@ -73,7 +73,7 @@
                 }
             }
         },
-        "/auth/register": {
+        "/api/v1/auth/register": {
             "post": {
                 "description": "Crea una nueva cuenta de usuario",
                 "consumes": [
@@ -125,7 +125,7 @@
                 }
             }
         },
-        "/hello": {
+        "/api/v1/hello": {
             "get": {
                 "description": "Endpoint público para probar la API",
                 "consumes": [
@@ -148,7 +148,7 @@
                 }
             }
         },
-        "/protected": {
+        "/api/v1/protected": {
             "get": {
                 "security": [
                     {

@@ -82,7 +82,7 @@ info:
   title: Fluxio API
   version: "1.0"
 paths:
-  /auth/login:
+  /api/v1/auth/login:
     post:
       consumes:
       - application/json
@@ -116,7 +116,7 @@ paths:
       summary: Iniciar sesión
       tags:
       - auth
-  /auth/register:
+  /api/v1/auth/register:
     post:
       consumes:
       - application/json
@@ -150,7 +150,7 @@ paths:
       summary: Registrar usuario
       tags:
       - auth
-  /hello:
+  /api/v1/hello:
     get:
       consumes:
       - application/json
@@ -165,7 +165,7 @@ paths:
       summary: Endpoint de prueba
       tags:
       - public
-  /protected:
+  /api/v1/protected:
     get:
       consumes:
       - application/json
