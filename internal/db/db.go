@@ -24,8 +24,14 @@ func Connect() {
 		log.Fatal("Error connecting to database:", err)
 	}
 
-	// Auto migrate models
-	err = DB.AutoMigrate(&models.User{})
+	// Enable pgcrypto extension for gen_random_uuid()
+	err = DB.Exec("CREATE EXTENSION IF NOT EXISTS \"pgcrypto\"").Error
+	if err != nil {
+		log.Fatal("Error creating pgcrypto extension:", err)
+	}
+
+	// Auto migrate all models
+	err = DB.AutoMigrate(models.GetAllModels()...)
 	if err != nil {
 		log.Fatal("Error migrating database:", err)
 	}

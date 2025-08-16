@@ -1,0 +1,24 @@
+package models
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
+
+type Expense struct {
+	ID            uuid.UUID      `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	UserID        uuid.UUID      `json:"user_id" gorm:"type:uuid;not null"`
+	CategoryID    uuid.UUID      `json:"category_id" gorm:"type:uuid;not null"`
+	Amount        float64        `json:"amount" gorm:"type:decimal(15,2);not null"`
+	Date          time.Time      `json:"date" gorm:"type:date;not null"`
+	BankAccountID uuid.UUID      `json:"bank_account_id" gorm:"type:uuid;not null"`
+	Description   *string        `json:"description"`
+	DeletedAt     gorm.DeletedAt `json:"-" gorm:"index"`
+
+	// Relaciones
+	User        User        `json:"user" gorm:"foreignKey:UserID;references:ID"`
+	Category    Category    `json:"category" gorm:"foreignKey:CategoryID;references:ID"`
+	BankAccount BankAccount `json:"bank_account" gorm:"foreignKey:BankAccountID;references:ID"`
+}

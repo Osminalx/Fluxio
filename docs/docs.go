@@ -285,6 +285,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "monthly_income": {
+                    "type": "number"
+                },
                 "name": {
                     "type": "string"
                 },
