@@ -8,6 +8,423 @@ definitions:
       user:
         $ref: '#/definitions/models.User'
     type: object
+  api.BankAccountFullResponse:
+    properties:
+      account_name:
+        example: Main Checking Account
+        type: string
+      balance:
+        example: 2500
+        type: number
+      created_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      status:
+        example: active
+        type: string
+      status_changed_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      updated_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+    type: object
+  api.BankAccountResponse:
+    properties:
+      account_name:
+        example: Main Checking
+        type: string
+      balance:
+        example: 2500
+        type: number
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  api.BankAccountsListResponse:
+    properties:
+      bank_accounts:
+        items:
+          $ref: '#/definitions/api.BankAccountFullResponse'
+        type: array
+      count:
+        example: 3
+        type: integer
+    type: object
+  api.BudgetHistoryListResponse:
+    properties:
+      count:
+        example: 10
+        type: integer
+      history:
+        items:
+          $ref: '#/definitions/api.BudgetHistoryResponse'
+        type: array
+    type: object
+  api.BudgetHistoryPatternsResponse:
+    properties:
+      analyzed_changes_count:
+        example: 15
+        type: integer
+      analyzed_period_months:
+        example: 12
+        type: integer
+      change_frequency_seconds:
+        example:
+        - 86400
+        - 172800
+        - 604800
+        items:
+          type: integer
+        type: array
+      needs_changes:
+        items:
+          type: number
+        type: array
+      savings_changes:
+        items:
+          type: number
+        type: array
+      wants_changes:
+        items:
+          type: number
+        type: array
+    type: object
+  api.BudgetHistoryResponse:
+    properties:
+      budget_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      change_reason:
+        example: Salary increase
+        type: string
+      changed_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      new_needs_budget:
+        example: 2700
+        type: number
+      new_savings_budget:
+        example: 1200
+        type: number
+      new_wants_budget:
+        example: 1300
+        type: number
+      old_needs_budget:
+        example: 2500
+        type: number
+      old_savings_budget:
+        example: 1000
+        type: number
+      old_wants_budget:
+        example: 1500
+        type: number
+    type: object
+  api.BudgetHistoryStatsResponse:
+    properties:
+      first_change_date:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+      last_change_date:
+        example: "2024-12-15T10:30:00Z"
+        type: string
+      monthly_changes:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+      total_changes:
+        example: 25
+        type: integer
+    type: object
+  api.BudgetResponse:
+    properties:
+      created_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      month_year:
+        example: "2024-01-01"
+        type: string
+      needs_budget:
+        example: 2500
+        type: number
+      savings_budget:
+        example: 1000
+        type: number
+      status:
+        example: active
+        type: string
+      status_changed_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      total_budget:
+        example: 5000
+        type: number
+      updated_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      wants_budget:
+        example: 1500
+        type: number
+    type: object
+  api.BudgetsListResponse:
+    properties:
+      budgets:
+        items:
+          $ref: '#/definitions/api.BudgetResponse'
+        type: array
+      count:
+        example: 5
+        type: integer
+    type: object
+  api.CategoryResponse:
+    properties:
+      expense_type:
+        $ref: '#/definitions/api.ExpenseTypeResponse'
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Food
+        type: string
+    type: object
+  api.ChangeStatusRequest:
+    properties:
+      reason:
+        example: Error in the record
+        type: string
+      status:
+        example: inactive
+        type: string
+    type: object
+  api.CreateBankAccountRequest:
+    properties:
+      account_name:
+        example: Main Checking Account
+        type: string
+      balance:
+        example: 2500
+        type: number
+    type: object
+  api.CreateBudgetRequest:
+    properties:
+      month_year:
+        example: "2024-01-01"
+        type: string
+      needs_budget:
+        example: 2500
+        type: number
+      savings_budget:
+        example: 1000
+        type: number
+      wants_budget:
+        example: 1500
+        type: number
+    type: object
+  api.CreateExpenseRequest:
+    properties:
+      amount:
+        example: 150.75
+        type: number
+      bank_account_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      category_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      date:
+        example: "2024-01-15"
+        type: string
+      description:
+        example: Grocery shopping
+        type: string
+    type: object
+  api.CreateFixedExpenseRequest:
+    properties:
+      amount:
+        example: 1200
+        type: number
+      due_date:
+        example: "2024-01-15"
+        type: string
+      name:
+        example: Monthly Rent
+        type: string
+    type: object
+  api.CreateIncomeRequest:
+    properties:
+      amount:
+        example: 2500.5
+        type: number
+      date:
+        example: "2024-01-15"
+        type: string
+    type: object
+  api.CreateUserCategoryRequest:
+    properties:
+      expense_type_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Groceries
+        type: string
+    type: object
+  api.ExpenseResponse:
+    properties:
+      amount:
+        example: 150.75
+        type: number
+      bank_account:
+        $ref: '#/definitions/api.BankAccountResponse'
+      bank_account_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      category:
+        $ref: '#/definitions/api.CategoryResponse'
+      category_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      created_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      date:
+        example: "2024-01-15"
+        type: string
+      description:
+        example: Grocery shopping
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      status:
+        example: active
+        type: string
+      status_changed_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      updated_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+    type: object
+  api.ExpenseSummaryResponse:
+    properties:
+      average_amount:
+        example: 50.03
+        type: number
+      by_expense_type:
+        items:
+          $ref: '#/definitions/api.ExpensesByTypeResponse'
+        type: array
+      top_categories:
+        items:
+          $ref: '#/definitions/api.ExpensesByCategoryResponse'
+        type: array
+      total_amount:
+        example: 1250.75
+        type: number
+      total_count:
+        example: 25
+        type: integer
+    type: object
+  api.ExpenseTypeResponse:
+    properties:
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Needs
+        type: string
+    type: object
+  api.ExpenseTypesListResponse:
+    properties:
+      count:
+        example: 3
+        type: integer
+      expense_types:
+        items:
+          $ref: '#/definitions/api.SimpleExpenseTypeResponse'
+        type: array
+    type: object
+  api.ExpensesByCategoryResponse:
+    properties:
+      category_name:
+        example: Food
+        type: string
+      count:
+        example: 8
+        type: integer
+      expense_type_name:
+        example: Needs
+        type: string
+      total_amount:
+        example: 325.5
+        type: number
+    type: object
+  api.ExpensesByTypeResponse:
+    properties:
+      count:
+        example: 15
+        type: integer
+      expense_type_name:
+        example: Needs
+        type: string
+      total_amount:
+        example: 625
+        type: number
+    type: object
+  api.ExpensesListResponse:
+    properties:
+      count:
+        example: 5
+        type: integer
+      expenses:
+        items:
+          $ref: '#/definitions/api.ExpenseResponse'
+        type: array
+    type: object
+  api.FixedExpenseResponse:
+    properties:
+      amount:
+        example: 1200
+        type: number
+      created_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      due_date:
+        example: "2024-01-15"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Monthly Rent
+        type: string
+      status:
+        example: active
+        type: string
+      updated_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+    type: object
+  api.FixedExpensesListResponse:
+    properties:
+      count:
+        example: 5
+        type: integer
+      fixed_expenses:
+        items:
+          $ref: '#/definitions/api.FixedExpenseResponse'
+        type: array
+    type: object
   api.HelloResponse:
     properties:
       message:
@@ -16,6 +433,40 @@ definitions:
       status:
         example: success
         type: string
+    type: object
+  api.IncomeResponse:
+    properties:
+      amount:
+        example: 2500.5
+        type: number
+      created_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      date:
+        example: "2024-01-15"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      status:
+        example: active
+        type: string
+      status_changed_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      updated_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+    type: object
+  api.IncomesListResponse:
+    properties:
+      count:
+        example: 5
+        type: integer
+      incomes:
+        items:
+          $ref: '#/definitions/api.IncomeResponse'
+        type: array
     type: object
   api.LoginRequest:
     properties:
@@ -26,13 +477,10 @@ definitions:
         example: contraseña123
         type: string
     type: object
-  api.ProtectedResponse:
+  api.RefreshTokenRequest:
     properties:
-      message:
-        example: ¡Acceso autorizado! Esta es una ruta protegida.
+      refresh_token:
         type: string
-      user:
-        $ref: '#/definitions/api.UserClaims'
     type: object
   api.RegisterRequest:
     properties:
@@ -46,15 +494,214 @@ definitions:
         example: contraseña123
         type: string
     type: object
-  api.UserClaims:
+  api.SimpleExpenseTypeResponse:
     properties:
-      email:
-        example: usuario@ejemplo.com
+      categories:
+        items:
+          $ref: '#/definitions/api.UserCategoryResponse'
+        type: array
+      created_at:
+        example: "2024-01-15T10:30:00Z"
         type: string
-      user_id:
-        example: 550e8400-e29b-41d4-a716-446655440000
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Needs
+        type: string
+      status:
+        example: active
+        type: string
+      updated_at:
+        example: "2024-01-15T10:30:00Z"
         type: string
     type: object
+  api.SuccessResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  api.SystemOverviewResponse:
+    properties:
+      expense_types:
+        items:
+          $ref: '#/definitions/api.SimpleExpenseTypeResponse'
+        type: array
+      expense_types_count:
+        example: 3
+        type: integer
+      system_info:
+        additionalProperties: true
+        type: object
+    type: object
+  api.UpdateBankAccountRequest:
+    properties:
+      account_name:
+        example: Updated Account Name
+        type: string
+      balance:
+        example: 3000
+        type: number
+    type: object
+  api.UpdateBudgetRequest:
+    properties:
+      change_reason:
+        example: Salary increase
+        type: string
+      needs_budget:
+        example: 2700
+        type: number
+      savings_budget:
+        example: 1200
+        type: number
+      wants_budget:
+        example: 1300
+        type: number
+    type: object
+  api.UpdateExpenseRequest:
+    properties:
+      amount:
+        example: 175.5
+        type: number
+      bank_account_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      category_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      date:
+        example: "2024-01-16"
+        type: string
+      description:
+        example: Updated description
+        type: string
+    type: object
+  api.UpdateFixedExpenseRequest:
+    properties:
+      amount:
+        example: 1300
+        type: number
+      due_date:
+        example: "2024-01-20"
+        type: string
+      name:
+        example: Updated Rent
+        type: string
+    type: object
+  api.UpdateIncomeRequest:
+    properties:
+      amount:
+        example: 2800.75
+        type: number
+      date:
+        example: "2024-01-16"
+        type: string
+    type: object
+  api.UpdateUserCategoryRequest:
+    properties:
+      expense_type_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Groceries Updated
+        type: string
+    type: object
+  api.UserCategoriesGroupedResponse:
+    properties:
+      grouped_categories:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/api.UserCategoryResponse'
+          type: array
+        type: object
+      total_count:
+        example: 15
+        type: integer
+    type: object
+  api.UserCategoriesListResponse:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/api.UserCategoryResponse'
+        type: array
+      count:
+        example: 15
+        type: integer
+    type: object
+  api.UserCategoryExpenseType:
+    properties:
+      created_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Needs
+        type: string
+      status:
+        example: active
+        type: string
+      updated_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+    type: object
+  api.UserCategoryResponse:
+    properties:
+      created_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      expense_type:
+        $ref: '#/definitions/api.UserCategoryExpenseType'
+      expense_type_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Groceries
+        type: string
+      status:
+        example: active
+        type: string
+      status_changed_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      updated_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+    type: object
+  api.UserCategoryStatsResponse:
+    properties:
+      categories_by_type:
+        additionalProperties:
+          format: int64
+          type: integer
+        type: object
+      deleted_categories:
+        example: 2
+        type: integer
+      total_categories:
+        example: 15
+        type: integer
+    type: object
+  models.Status:
+    enum:
+    - active
+    - deleted
+    - suspended
+    - archived
+    - pending
+    - locked
+    type: string
+    x-enum-varnames:
+    - StatusActive
+    - StatusDeleted
+    - StatusSuspended
+    - StatusArchived
+    - StatusPending
+    - StatusLocked
   models.User:
     properties:
       created_at:
@@ -63,11 +710,25 @@ definitions:
         type: string
       id:
         type: string
+      last_login:
+        type: string
       monthly_income:
         type: number
       name:
         type: string
+      status:
+        $ref: '#/definitions/models.Status'
       updated_at:
+        type: string
+    type: object
+  services.TokenPair:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        description: seconds until access token expires
+        type: integer
+      refresh_token:
         type: string
     type: object
 host: localhost:8080
@@ -118,6 +779,99 @@ paths:
       summary: Iniciar sesión
       tags:
       - auth
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Revokes the refresh token (logout from current device)
+      parameters:
+      - description: Refresh token to revoke
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Logout user
+      tags:
+      - auth
+  /api/v1/auth/logout-all:
+    post:
+      consumes:
+      - application/json
+      description: Revokes all refresh tokens for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Logout from all devices
+      tags:
+      - auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Generates a new access token using a valid refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.TokenPair'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Invalid or expired refresh token
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Refresh access token
+      tags:
+      - auth
   /api/v1/auth/register:
     post:
       consumes:
@@ -152,6 +906,1399 @@ paths:
       summary: Registrar usuario
       tags:
       - auth
+  /api/v1/bank-accounts:
+    get:
+      consumes:
+      - application/json
+      description: Gets all bank accounts for the authenticated user with option to
+        include deleted
+      parameters:
+      - description: Include deleted bank accounts
+        in: query
+        name: include_deleted
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BankAccountsListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get all bank accounts
+      tags:
+      - bank_account
+    post:
+      consumes:
+      - application/json
+      description: Creates a new bank account for the authenticated user
+      parameters:
+      - description: Bank account data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateBankAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.BankAccountFullResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Create a new bank account
+      tags:
+      - bank_account
+  /api/v1/bank-accounts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Marks a bank account as deleted without permanently deleting it
+      parameters:
+      - description: Bank Account ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Bank account not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Delete a bank account (soft delete)
+      tags:
+      - bank_account
+    get:
+      consumes:
+      - application/json
+      description: Gets a specific bank account for the authenticated user by their
+        ID
+      parameters:
+      - description: Bank Account ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BankAccountResponse'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Bank account not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get a bank account by ID
+      tags:
+      - bank_account
+    patch:
+      consumes:
+      - application/json
+      description: Updates partially a bank account for the authenticated user
+      parameters:
+      - description: Bank Account ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateBankAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BankAccountResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Bank account not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Update a bank account
+      tags:
+      - bank_account
+  /api/v1/bank-accounts/{id}/restore:
+    post:
+      consumes:
+      - application/json
+      description: Restores a previously deleted bank account (soft delete)
+      parameters:
+      - description: Bank Account ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Bank account not found or not deleted
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Restore a deleted bank account
+      tags:
+      - bank_account
+  /api/v1/bank-accounts/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Changes the status of a bank account (active, inactive, deleted,
+        etc.)
+      parameters:
+      - description: Bank Account ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.ChangeStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Bank account not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Change the status of a bank account
+      tags:
+      - bank_account
+  /api/v1/bank-accounts/active:
+    get:
+      consumes:
+      - application/json
+      description: Gets all active bank accounts for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BankAccountsListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get active bank accounts
+      tags:
+      - bank_account
+  /api/v1/bank-accounts/deleted:
+    get:
+      consumes:
+      - application/json
+      description: Gets all deleted bank accounts for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BankAccountsListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get deleted bank accounts
+      tags:
+      - bank_account
+  /api/v1/budgets:
+    get:
+      consumes:
+      - application/json
+      description: Gets all budgets for the authenticated user with option to include
+        deleted
+      parameters:
+      - description: Include deleted budgets
+        in: query
+        name: include_deleted
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetsListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get all budgets
+      tags:
+      - budget
+    post:
+      consumes:
+      - application/json
+      description: Creates a new budget for the authenticated user for a specific
+        month/year
+      parameters:
+      - description: Budget data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateBudgetRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.BudgetResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "409":
+          description: Budget already exists for this month/year
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Create a new budget
+      tags:
+      - budget
+  /api/v1/budgets/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Marks a budget as deleted without permanently deleting it
+      parameters:
+      - description: Budget ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Budget not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Delete a budget (soft delete)
+      tags:
+      - budget
+    get:
+      consumes:
+      - application/json
+      description: Gets a specific budget for the authenticated user by their ID
+      parameters:
+      - description: Budget ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetResponse'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Budget not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get a budget by ID
+      tags:
+      - budget
+    patch:
+      consumes:
+      - application/json
+      description: Updates partially a budget for the authenticated user (creates
+        history entry)
+      parameters:
+      - description: Budget ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateBudgetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Budget not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Update a budget
+      tags:
+      - budget
+  /api/v1/budgets/{id}/restore:
+    post:
+      consumes:
+      - application/json
+      description: Restores a previously deleted budget (soft delete)
+      parameters:
+      - description: Budget ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Budget not found or not deleted
+          schema:
+            type: string
+        "409":
+          description: Another active budget exists for this month/year
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Restore a deleted budget
+      tags:
+      - budget
+  /api/v1/budgets/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Changes the status of a budget (active, inactive, deleted, etc.)
+      parameters:
+      - description: Budget ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.ChangeStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Budget not found
+          schema:
+            type: string
+        "409":
+          description: Another active budget exists for this month/year
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Change the status of a budget
+      tags:
+      - budget
+  /api/v1/budgets/active:
+    get:
+      consumes:
+      - application/json
+      description: Gets all active budgets for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetsListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get active budgets
+      tags:
+      - budget
+  /api/v1/budgets/by-month:
+    get:
+      consumes:
+      - application/json
+      description: Gets the budget for the authenticated user for a specific month/year
+      parameters:
+      - description: Month year (YYYY-MM-DD, first day of month)
+        in: query
+        name: month_year
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetResponse'
+        "400":
+          description: Invalid month_year parameter
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Budget not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get a budget by month/year
+      tags:
+      - budget
+  /api/v1/budgets/deleted:
+    get:
+      consumes:
+      - application/json
+      description: Gets all deleted budgets for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetsListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get deleted budgets
+      tags:
+      - budget
+  /api/v1/expenses:
+    get:
+      consumes:
+      - application/json
+      description: Gets all expenses for the authenticated user with option to include
+        deleted
+      parameters:
+      - description: Include deleted expenses
+        in: query
+        name: include_deleted
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpensesListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get all expenses
+      tags:
+      - expense
+    post:
+      consumes:
+      - application/json
+      description: Creates a new expense for the authenticated user
+      parameters:
+      - description: Expense data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateExpenseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.ExpenseResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Create a new expense
+      tags:
+      - expense
+  /api/v1/expenses/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Marks an expense as deleted without permanently deleting it
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Expense not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Delete an expense (soft delete)
+      tags:
+      - expense
+    get:
+      consumes:
+      - application/json
+      description: Gets a specific expense for the authenticated user by their ID
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpenseResponse'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Expense not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get an expense by ID
+      tags:
+      - expense
+    patch:
+      consumes:
+      - application/json
+      description: Updates partially an expense for the authenticated user
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateExpenseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpenseResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Expense not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Update an expense
+      tags:
+      - expense
+  /api/v1/expenses/{id}/restore:
+    post:
+      consumes:
+      - application/json
+      description: Restores a previously deleted expense (soft delete)
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Expense not found or not deleted
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Restore a deleted expense
+      tags:
+      - expense
+  /api/v1/expenses/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Changes the status of an expense (active, inactive, deleted, etc.)
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.ChangeStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Expense not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Change the status of an expense
+      tags:
+      - expense
+  /api/v1/expenses/active:
+    get:
+      consumes:
+      - application/json
+      description: Gets all active expenses for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpensesListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get active expenses
+      tags:
+      - expense
+  /api/v1/expenses/bank-account/{bank_account_id}:
+    get:
+      consumes:
+      - application/json
+      description: Gets expenses for the authenticated user filtered by bank account
+      parameters:
+      - description: Bank Account ID
+        in: path
+        name: bank_account_id
+        required: true
+        type: string
+      - description: Include deleted expenses
+        in: query
+        name: include_deleted
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpensesListResponse'
+        "400":
+          description: Invalid bank account ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get expenses by bank account
+      tags:
+      - expense
+  /api/v1/expenses/category/{category_id}:
+    get:
+      consumes:
+      - application/json
+      description: Gets expenses for the authenticated user filtered by category
+      parameters:
+      - description: Category ID
+        in: path
+        name: category_id
+        required: true
+        type: string
+      - description: Include deleted expenses
+        in: query
+        name: include_deleted
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpensesListResponse'
+        "400":
+          description: Invalid category ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get expenses by category
+      tags:
+      - expense
+  /api/v1/expenses/date-range:
+    get:
+      consumes:
+      - application/json
+      description: Gets expenses for the authenticated user within a date range
+      parameters:
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        required: true
+        type: string
+      - description: Include deleted expenses
+        in: query
+        name: include_deleted
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpensesListResponse'
+        "400":
+          description: Invalid date parameters
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get expenses by date range
+      tags:
+      - expense
+  /api/v1/expenses/deleted:
+    get:
+      consumes:
+      - application/json
+      description: Gets all deleted expenses for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpensesListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get deleted expenses
+      tags:
+      - expense
+  /api/v1/expenses/monthly:
+    get:
+      consumes:
+      - application/json
+      description: Gets expenses for the authenticated user for a specific month
+      parameters:
+      - description: Year (e.g., 2024)
+        in: query
+        name: year
+        required: true
+        type: integer
+      - description: Month (1-12)
+        in: query
+        name: month
+        required: true
+        type: integer
+      - description: Include deleted expenses
+        in: query
+        name: include_deleted
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpensesListResponse'
+        "400":
+          description: Invalid year or month parameters
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get monthly expenses
+      tags:
+      - expense
+  /api/v1/expenses/summary:
+    get:
+      consumes:
+      - application/json
+      description: Gets expenses summary for the authenticated user within a date
+        range
+      parameters:
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpenseSummaryResponse'
+        "400":
+          description: Invalid date parameters
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get expenses summary
+      tags:
+      - expense
+  /api/v1/fixed-expenses:
+    get:
+      consumes:
+      - application/json
+      description: Gets all fixed expenses for the authenticated user with option
+        to include deleted
+      parameters:
+      - description: Include deleted fixed expenses
+        in: query
+        name: include_deleted
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.FixedExpensesListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get all fixed expenses
+      tags:
+      - fixed_expense
+    post:
+      consumes:
+      - application/json
+      description: Creates a new fixed expense for the authenticated user
+      parameters:
+      - description: Fixed expense data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateFixedExpenseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.FixedExpenseResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Create a new fixed expense
+      tags:
+      - fixed_expense
+  /api/v1/fixed-expenses/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Marks a fixed expense as deleted without permanently deleting it
+      parameters:
+      - description: Fixed Expense ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Fixed expense not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Delete a fixed expense (soft delete)
+      tags:
+      - fixed_expense
+    get:
+      consumes:
+      - application/json
+      description: Gets a specific fixed expense for the authenticated user by their
+        ID
+      parameters:
+      - description: Fixed Expense ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.FixedExpenseResponse'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Fixed expense not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get a fixed expense by ID
+      tags:
+      - fixed_expense
+    patch:
+      consumes:
+      - application/json
+      description: Updates partially a fixed expense for the authenticated user
+      parameters:
+      - description: Fixed Expense ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateFixedExpenseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.FixedExpenseResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Fixed expense not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Update a fixed expense
+      tags:
+      - fixed_expense
   /api/v1/hello:
     get:
       consumes:
@@ -167,31 +2314,1044 @@ paths:
       summary: Endpoint de prueba
       tags:
       - public
-  /api/v1/protected:
+  /api/v1/incomes:
     get:
       consumes:
       - application/json
-      description: Endpoint que requiere autenticación JWT
+      description: Gets all incomes for the authenticated user with option to include
+        deleted
+      parameters:
+      - description: Include deleted incomes
+        in: query
+        name: include_deleted
+        type: boolean
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.ProtectedResponse'
+            $ref: '#/definitions/api.IncomesListResponse'
         "401":
-          description: No autorizado
+          description: Unauthorized
           schema:
             type: string
         "500":
-          description: Error interno del servidor
+          description: Internal server error
           schema:
             type: string
       security:
       - bearerAuth: []
-      summary: Endpoint protegido
+      summary: Get all incomes
       tags:
-      - protected
+      - income
+    post:
+      consumes:
+      - application/json
+      description: Creates a new income for the authenticated user
+      parameters:
+      - description: Income data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateIncomeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.IncomeResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Create a new income
+      tags:
+      - income
+  /api/v1/incomes/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Marks an income as deleted without permanently deleting it
+      parameters:
+      - description: Income ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Income not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Delete an income (soft delete)
+      tags:
+      - income
+    get:
+      consumes:
+      - application/json
+      description: Gets a specific income for the authenticated user by their ID
+      parameters:
+      - description: Income ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.IncomeResponse'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Income not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get an income by ID
+      tags:
+      - income
+    patch:
+      consumes:
+      - application/json
+      description: Updates partially an income for the authenticated user
+      parameters:
+      - description: Income ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Data to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateIncomeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.IncomeResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Income not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Update an income
+      tags:
+      - income
+  /api/v1/incomes/{id}/restore:
+    post:
+      consumes:
+      - application/json
+      description: Restores a previously deleted income (soft delete)
+      parameters:
+      - description: Income ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Income not found or not deleted
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Restore a deleted income
+      tags:
+      - income
+  /api/v1/incomes/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Changes the status of an income (active, inactive, deleted, etc.)
+      parameters:
+      - description: Income ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.ChangeStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Income not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Change the status of an income
+      tags:
+      - income
+  /api/v1/incomes/active:
+    get:
+      consumes:
+      - application/json
+      description: Gets all active incomes for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.IncomesListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get active incomes
+      tags:
+      - income
+  /api/v1/incomes/deleted:
+    get:
+      consumes:
+      - application/json
+      description: Gets all deleted incomes for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.IncomesListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get deleted incomes
+      tags:
+      - income
+  /budget-history:
+    get:
+      consumes:
+      - application/json
+      description: Get all budget history entries for the user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryListResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get all budget history
+      tags:
+      - Budget History
+  /budget-history/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific budget history entry by ID
+      parameters:
+      - description: Budget History ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryResponse'
+        "400":
+          description: Budget history ID is required
+          schema:
+            type: string
+        "404":
+          description: Budget history not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get budget history by ID
+      tags:
+      - Budget History
+  /budget-history/date-range:
+    get:
+      consumes:
+      - application/json
+      description: Get budget history entries within a specific date range
+      parameters:
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryListResponse'
+        "400":
+          description: Date parameters are required or invalid
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get budget history by date range
+      tags:
+      - Budget History
+  /budget-history/patterns:
+    get:
+      consumes:
+      - application/json
+      description: Analyze patterns in budget changes for machine learning insights
+      parameters:
+      - description: Number of months to analyze
+        in: query
+        name: months
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryPatternsResponse'
+        "400":
+          description: Invalid months parameter
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Analyze budget patterns
+      tags:
+      - Budget History
+  /budget-history/reasons:
+    get:
+      consumes:
+      - application/json
+      description: Get budget history entries filtered by change reason
+      parameters:
+      - description: Change reason filter
+        in: query
+        name: reason
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryListResponse'
+        "400":
+          description: Reason filter is required
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get budget history with reasons filter
+      tags:
+      - Budget History
+  /budget-history/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get statistical information about budget history
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryStatsResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get budget history statistics
+      tags:
+      - Budget History
+  /budgets/{budget_id}/history:
+    get:
+      consumes:
+      - application/json
+      description: Get all history entries for a specific budget
+      parameters:
+      - description: Budget ID
+        in: path
+        name: budget_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryListResponse'
+        "400":
+          description: Budget ID is required
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get budget history by budget ID
+      tags:
+      - Budget History
+  /expense-types:
+    get:
+      consumes:
+      - application/json
+      description: Get all active expense types (Needs, Wants, Savings)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpenseTypesListResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get all expense types
+      tags:
+      - Expense Types
+  /expense-types/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific expense type by ID
+      parameters:
+      - description: Expense Type ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SimpleExpenseTypeResponse'
+        "400":
+          description: Expense type ID is required
+          schema:
+            type: string
+        "404":
+          description: Expense type not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get expense type by ID
+      tags:
+      - Expense Types
+  /expense-types/name/{name}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific expense type by name (Needs, Wants, Savings)
+      parameters:
+      - description: Expense Type Name
+        enum:
+        - Needs
+        - Wants
+        - Savings
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SimpleExpenseTypeResponse'
+        "400":
+          description: Expense type name is required
+          schema:
+            type: string
+        "404":
+          description: Expense type not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get expense type by name
+      tags:
+      - Expense Types
+  /expense-types/with-categories:
+    get:
+      consumes:
+      - application/json
+      description: Get all expense types with the authenticated user's categories
+        loaded
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpenseTypesListResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get expense types with user categories
+      tags:
+      - Expense Types
+  /setup/initialize:
+    post:
+      consumes:
+      - application/json
+      description: Initialize the basic expense system with default expense types
+        (Admin only)
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.SuccessResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Initialize expense system
+      tags:
+      - System Setup
+  /setup/overview:
+    get:
+      consumes:
+      - application/json
+      description: Get an overview of the expense system setup and configuration
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemOverviewResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get system overview
+      tags:
+      - System Setup
+  /setup/user:
+    post:
+      consumes:
+      - application/json
+      description: Create default categories for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.SuccessResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Setup new user
+      tags:
+      - System Setup
+  /user-categories:
+    get:
+      consumes:
+      - application/json
+      description: Get all categories for the authenticated user
+      parameters:
+      - description: Include deleted categories
+        in: query
+        name: include_deleted
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.UserCategoriesListResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get all user categories
+      tags:
+      - User Categories
+    post:
+      consumes:
+      - application/json
+      description: Create a new category for the authenticated user
+      parameters:
+      - description: Category data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateUserCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.UserCategoryResponse'
+        "400":
+          description: Invalid request body or missing required fields
+          schema:
+            type: string
+        "409":
+          description: Category already exists
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create user category
+      tags:
+      - User Categories
+  /user-categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Soft delete a user category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Category ID is required
+          schema:
+            type: string
+        "404":
+          description: Category not found
+          schema:
+            type: string
+        "409":
+          description: Category has active expenses
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete user category
+      tags:
+      - User Categories
+    get:
+      consumes:
+      - application/json
+      description: Get a specific user category by ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.UserCategoryResponse'
+        "400":
+          description: Category ID is required
+          schema:
+            type: string
+        "404":
+          description: Category not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get user category by ID
+      tags:
+      - User Categories
+    put:
+      consumes:
+      - application/json
+      description: Update an existing user category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated category data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateUserCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.UserCategoryResponse'
+        "400":
+          description: Invalid request or missing required fields
+          schema:
+            type: string
+        "404":
+          description: Category not found
+          schema:
+            type: string
+        "409":
+          description: Category name already exists
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update user category
+      tags:
+      - User Categories
+  /user-categories/{id}/restore:
+    post:
+      consumes:
+      - application/json
+      description: Restore a deleted user category
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid request or category can't be restored
+          schema:
+            type: string
+        "404":
+          description: Category not found
+          schema:
+            type: string
+        "409":
+          description: Category name conflict
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Restore user category
+      tags:
+      - User Categories
+  /user-categories/defaults:
+    post:
+      consumes:
+      - application/json
+      description: Create default categories for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.SuccessResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create default user categories
+      tags:
+      - User Categories
+  /user-categories/expense-type-name/{expense_type_name}:
+    get:
+      consumes:
+      - application/json
+      description: Get user categories for a specific expense type by name (Needs,
+        Wants, Savings)
+      parameters:
+      - description: Expense Type Name
+        enum:
+        - Needs
+        - Wants
+        - Savings
+        in: path
+        name: expense_type_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.UserCategoriesListResponse'
+        "400":
+          description: Expense type name is required
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get user categories by expense type name
+      tags:
+      - User Categories
+  /user-categories/expense-type/{expense_type_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get user categories for a specific expense type
+      parameters:
+      - description: Expense Type ID
+        in: path
+        name: expense_type_id
+        required: true
+        type: string
+      - description: Include deleted categories
+        in: query
+        name: include_deleted
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.UserCategoriesListResponse'
+        "400":
+          description: Expense type ID is required
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get user categories by expense type
+      tags:
+      - User Categories
+  /user-categories/grouped:
+    get:
+      consumes:
+      - application/json
+      description: Get user categories grouped by expense type
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.UserCategoriesGroupedResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get user categories grouped by type
+      tags:
+      - User Categories
+  /user-categories/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get statistics about user's categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.UserCategoryStatsResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get user category statistics
+      tags:
+      - User Categories
 schemes:
 - http
 securityDefinitions:

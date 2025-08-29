@@ -73,6 +73,150 @@
                 }
             }
         },
+        "/api/v1/auth/logout": {
+            "post": {
+                "description": "Revokes the refresh token (logout from current device)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logout user",
+                "parameters": [
+                    {
+                        "description": "Refresh token to revoke",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout-all": {
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Revokes all refresh tokens for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Logout from all devices",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/refresh": {
+            "post": {
+                "description": "Generates a new access token using a valid refresh token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Refresh access token",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/services.TokenPair"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid or expired refresh token",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/auth/register": {
             "post": {
                 "description": "Crea una nueva cuenta de usuario",
@@ -125,6 +269,2172 @@
                 }
             }
         },
+        "/api/v1/bank-accounts": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets all bank accounts for the authenticated user with option to include deleted",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bank_account"
+                ],
+                "summary": "Get all bank accounts",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Include deleted bank accounts",
+                        "name": "include_deleted",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BankAccountsListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Creates a new bank account for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bank_account"
+                ],
+                "summary": "Create a new bank account",
+                "parameters": [
+                    {
+                        "description": "Bank account data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateBankAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/api.BankAccountFullResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/bank-accounts/active": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets all active bank accounts for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bank_account"
+                ],
+                "summary": "Get active bank accounts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BankAccountsListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/bank-accounts/deleted": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets all deleted bank accounts for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bank_account"
+                ],
+                "summary": "Get deleted bank accounts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BankAccountsListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/bank-accounts/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets a specific bank account for the authenticated user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bank_account"
+                ],
+                "summary": "Get a bank account by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bank Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BankAccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Bank account not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Marks a bank account as deleted without permanently deleting it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bank_account"
+                ],
+                "summary": "Delete a bank account (soft delete)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bank Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Bank account not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Updates partially a bank account for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bank_account"
+                ],
+                "summary": "Update a bank account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bank Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Data to update",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateBankAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BankAccountResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Bank account not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/bank-accounts/{id}/restore": {
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Restores a previously deleted bank account (soft delete)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bank_account"
+                ],
+                "summary": "Restore a deleted bank account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bank Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Bank account not found or not deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/bank-accounts/{id}/status": {
+            "patch": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Changes the status of a bank account (active, inactive, deleted, etc.)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bank_account"
+                ],
+                "summary": "Change the status of a bank account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bank Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.ChangeStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Bank account not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/budgets": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets all budgets for the authenticated user with option to include deleted",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget"
+                ],
+                "summary": "Get all budgets",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Include deleted budgets",
+                        "name": "include_deleted",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetsListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Creates a new budget for the authenticated user for a specific month/year",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget"
+                ],
+                "summary": "Create a new budget",
+                "parameters": [
+                    {
+                        "description": "Budget data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateBudgetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Budget already exists for this month/year",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/budgets/active": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets all active budgets for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget"
+                ],
+                "summary": "Get active budgets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetsListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/budgets/by-month": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets the budget for the authenticated user for a specific month/year",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget"
+                ],
+                "summary": "Get a budget by month/year",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Month year (YYYY-MM-DD, first day of month)",
+                        "name": "month_year",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid month_year parameter",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Budget not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/budgets/deleted": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets all deleted budgets for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget"
+                ],
+                "summary": "Get deleted budgets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetsListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/budgets/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets a specific budget for the authenticated user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget"
+                ],
+                "summary": "Get a budget by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Budget ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Budget not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Marks a budget as deleted without permanently deleting it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget"
+                ],
+                "summary": "Delete a budget (soft delete)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Budget ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Budget not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Updates partially a budget for the authenticated user (creates history entry)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget"
+                ],
+                "summary": "Update a budget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Budget ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Data to update",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateBudgetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Budget not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/budgets/{id}/restore": {
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Restores a previously deleted budget (soft delete)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget"
+                ],
+                "summary": "Restore a deleted budget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Budget ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Budget not found or not deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Another active budget exists for this month/year",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/budgets/{id}/status": {
+            "patch": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Changes the status of a budget (active, inactive, deleted, etc.)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budget"
+                ],
+                "summary": "Change the status of a budget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Budget ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.ChangeStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Budget not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Another active budget exists for this month/year",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/expenses": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets all expenses for the authenticated user with option to include deleted",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Get all expenses",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Include deleted expenses",
+                        "name": "include_deleted",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpensesListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Creates a new expense for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Create a new expense",
+                "parameters": [
+                    {
+                        "description": "Expense data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateExpenseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpenseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/expenses/active": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets all active expenses for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Get active expenses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpensesListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/expenses/bank-account/{bank_account_id}": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets expenses for the authenticated user filtered by bank account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Get expenses by bank account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bank Account ID",
+                        "name": "bank_account_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Include deleted expenses",
+                        "name": "include_deleted",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpensesListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid bank account ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/expenses/category/{category_id}": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets expenses for the authenticated user filtered by category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Get expenses by category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "category_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Include deleted expenses",
+                        "name": "include_deleted",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpensesListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid category ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/expenses/date-range": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets expenses for the authenticated user within a date range",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Get expenses by date range",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Include deleted expenses",
+                        "name": "include_deleted",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpensesListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid date parameters",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/expenses/deleted": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets all deleted expenses for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Get deleted expenses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpensesListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/expenses/monthly": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets expenses for the authenticated user for a specific month",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Get monthly expenses",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Year (e.g., 2024)",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Month (1-12)",
+                        "name": "month",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Include deleted expenses",
+                        "name": "include_deleted",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpensesListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid year or month parameters",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/expenses/summary": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets expenses summary for the authenticated user within a date range",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Get expenses summary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpenseSummaryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid date parameters",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/expenses/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets a specific expense for the authenticated user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Get an expense by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Expense ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpenseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Expense not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Marks an expense as deleted without permanently deleting it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Delete an expense (soft delete)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Expense ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Expense not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Updates partially an expense for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Update an expense",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Expense ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Data to update",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateExpenseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpenseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Expense not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/expenses/{id}/restore": {
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Restores a previously deleted expense (soft delete)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Restore a deleted expense",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Expense ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Expense not found or not deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/expenses/{id}/status": {
+            "patch": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Changes the status of an expense (active, inactive, deleted, etc.)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense"
+                ],
+                "summary": "Change the status of an expense",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Expense ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.ChangeStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Expense not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/fixed-expenses": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets all fixed expenses for the authenticated user with option to include deleted",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "fixed_expense"
+                ],
+                "summary": "Get all fixed expenses",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Include deleted fixed expenses",
+                        "name": "include_deleted",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.FixedExpensesListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Creates a new fixed expense for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "fixed_expense"
+                ],
+                "summary": "Create a new fixed expense",
+                "parameters": [
+                    {
+                        "description": "Fixed expense data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateFixedExpenseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/api.FixedExpenseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/fixed-expenses/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets a specific fixed expense for the authenticated user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "fixed_expense"
+                ],
+                "summary": "Get a fixed expense by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Fixed Expense ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.FixedExpenseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Fixed expense not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Marks a fixed expense as deleted without permanently deleting it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "fixed_expense"
+                ],
+                "summary": "Delete a fixed expense (soft delete)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Fixed Expense ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Fixed expense not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Updates partially a fixed expense for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "fixed_expense"
+                ],
+                "summary": "Update a fixed expense",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Fixed Expense ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Data to update",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateFixedExpenseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.FixedExpenseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Fixed expense not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/hello": {
             "get": {
                 "description": "Endpoint público para probar la API",
@@ -148,14 +2458,14 @@
                 }
             }
         },
-        "/api/v1/protected": {
+        "/api/v1/incomes": {
             "get": {
                 "security": [
                     {
                         "bearerAuth": []
                     }
                 ],
-                "description": "Endpoint que requiere autenticación JWT",
+                "description": "Gets all incomes for the authenticated user with option to include deleted",
                 "consumes": [
                     "application/json"
                 ],
@@ -163,24 +2473,1607 @@
                     "application/json"
                 ],
                 "tags": [
-                    "protected"
+                    "income"
                 ],
-                "summary": "Endpoint protegido",
+                "summary": "Get all incomes",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Include deleted incomes",
+                        "name": "include_deleted",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.ProtectedResponse"
+                            "$ref": "#/definitions/api.IncomesListResponse"
                         }
                     },
                     "401": {
-                        "description": "No autorizado",
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "Error interno del servidor",
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Creates a new income for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "income"
+                ],
+                "summary": "Create a new income",
+                "parameters": [
+                    {
+                        "description": "Income data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateIncomeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/api.IncomeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/incomes/active": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets all active incomes for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "income"
+                ],
+                "summary": "Get active incomes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.IncomesListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/incomes/deleted": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets all deleted incomes for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "income"
+                ],
+                "summary": "Get deleted incomes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.IncomesListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/incomes/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Gets a specific income for the authenticated user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "income"
+                ],
+                "summary": "Get an income by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Income ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.IncomeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Income not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Marks an income as deleted without permanently deleting it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "income"
+                ],
+                "summary": "Delete an income (soft delete)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Income ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Income not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Updates partially an income for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "income"
+                ],
+                "summary": "Update an income",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Income ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Data to update",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateIncomeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.IncomeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Income not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/incomes/{id}/restore": {
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Restores a previously deleted income (soft delete)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "income"
+                ],
+                "summary": "Restore a deleted income",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Income ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Income not found or not deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/incomes/{id}/status": {
+            "patch": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Changes the status of an income (active, inactive, deleted, etc.)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "income"
+                ],
+                "summary": "Change the status of an income",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Income ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.ChangeStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Income not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/budget-history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all budget history entries for the user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Get all budget history",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/budget-history/date-range": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get budget history entries within a specific date range",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Get budget history by date range",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Date parameters are required or invalid",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/budget-history/patterns": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Analyze patterns in budget changes for machine learning insights",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Analyze budget patterns",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of months to analyze",
+                        "name": "months",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryPatternsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid months parameter",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/budget-history/reasons": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get budget history entries filtered by change reason",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Get budget history with reasons filter",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Change reason filter",
+                        "name": "reason",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Reason filter is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/budget-history/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get statistical information about budget history",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Get budget history statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryStatsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/budget-history/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a specific budget history entry by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Get budget history by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Budget History ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Budget history ID is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Budget history not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/budgets/{budget_id}/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all history entries for a specific budget",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Get budget history by budget ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Budget ID",
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Budget ID is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/expense-types": {
+            "get": {
+                "description": "Get all active expense types (Needs, Wants, Savings)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Expense Types"
+                ],
+                "summary": "Get all expense types",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpenseTypesListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/expense-types/name/{name}": {
+            "get": {
+                "description": "Get a specific expense type by name (Needs, Wants, Savings)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Expense Types"
+                ],
+                "summary": "Get expense type by name",
+                "parameters": [
+                    {
+                        "enum": [
+                            "Needs",
+                            "Wants",
+                            "Savings"
+                        ],
+                        "type": "string",
+                        "description": "Expense Type Name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SimpleExpenseTypeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Expense type name is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Expense type not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/expense-types/with-categories": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all expense types with the authenticated user's categories loaded",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Expense Types"
+                ],
+                "summary": "Get expense types with user categories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpenseTypesListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/expense-types/{id}": {
+            "get": {
+                "description": "Get a specific expense type by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Expense Types"
+                ],
+                "summary": "Get expense type by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Expense Type ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SimpleExpenseTypeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Expense type ID is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Expense type not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/setup/initialize": {
+            "post": {
+                "description": "Initialize the basic expense system with default expense types (Admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System Setup"
+                ],
+                "summary": "Initialize expense system",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/api.SuccessResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/setup/overview": {
+            "get": {
+                "description": "Get an overview of the expense system setup and configuration",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System Setup"
+                ],
+                "summary": "Get system overview",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SystemOverviewResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/setup/user": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create default categories for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System Setup"
+                ],
+                "summary": "Setup new user",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/api.SuccessResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-categories": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all categories for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Categories"
+                ],
+                "summary": "Get all user categories",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Include deleted categories",
+                        "name": "include_deleted",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.UserCategoriesListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new category for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Categories"
+                ],
+                "summary": "Create user category",
+                "parameters": [
+                    {
+                        "description": "Category data",
+                        "name": "category",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateUserCategoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/api.UserCategoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or missing required fields",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Category already exists",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-categories/defaults": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create default categories for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Categories"
+                ],
+                "summary": "Create default user categories",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/api.SuccessResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-categories/expense-type-name/{expense_type_name}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get user categories for a specific expense type by name (Needs, Wants, Savings)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Categories"
+                ],
+                "summary": "Get user categories by expense type name",
+                "parameters": [
+                    {
+                        "enum": [
+                            "Needs",
+                            "Wants",
+                            "Savings"
+                        ],
+                        "type": "string",
+                        "description": "Expense Type Name",
+                        "name": "expense_type_name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.UserCategoriesListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Expense type name is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-categories/expense-type/{expense_type_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get user categories for a specific expense type",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Categories"
+                ],
+                "summary": "Get user categories by expense type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Expense Type ID",
+                        "name": "expense_type_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Include deleted categories",
+                        "name": "include_deleted",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.UserCategoriesListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Expense type ID is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-categories/grouped": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get user categories grouped by expense type",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Categories"
+                ],
+                "summary": "Get user categories grouped by type",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.UserCategoriesGroupedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-categories/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get statistics about user's categories",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Categories"
+                ],
+                "summary": "Get user category statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.UserCategoryStatsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-categories/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a specific user category by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Categories"
+                ],
+                "summary": "Get user category by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.UserCategoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Category ID is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Category not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update an existing user category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Categories"
+                ],
+                "summary": "Update user category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated category data",
+                        "name": "category",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateUserCategoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.UserCategoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or missing required fields",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Category not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Category name already exists",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Soft delete a user category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Categories"
+                ],
+                "summary": "Delete user category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Category ID is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Category not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Category has active expenses",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-categories/{id}/restore": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Restore a deleted user category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Categories"
+                ],
+                "summary": "Restore user category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Invalid request or category can't be restored",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Category not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "409": {
+                        "description": "Category name conflict",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "type": "string"
                         }
@@ -202,6 +4095,597 @@
                 }
             }
         },
+        "api.BankAccountFullResponse": {
+            "type": "object",
+            "properties": {
+                "account_name": {
+                    "type": "string",
+                    "example": "Main Checking Account"
+                },
+                "balance": {
+                    "type": "number",
+                    "example": 2500
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "status_changed_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                }
+            }
+        },
+        "api.BankAccountResponse": {
+            "type": "object",
+            "properties": {
+                "account_name": {
+                    "type": "string",
+                    "example": "Main Checking"
+                },
+                "balance": {
+                    "type": "number",
+                    "example": 2500
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                }
+            }
+        },
+        "api.BankAccountsListResponse": {
+            "type": "object",
+            "properties": {
+                "bank_accounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.BankAccountFullResponse"
+                    }
+                },
+                "count": {
+                    "type": "integer",
+                    "example": 3
+                }
+            }
+        },
+        "api.BudgetHistoryListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.BudgetHistoryResponse"
+                    }
+                }
+            }
+        },
+        "api.BudgetHistoryPatternsResponse": {
+            "type": "object",
+            "properties": {
+                "analyzed_changes_count": {
+                    "type": "integer",
+                    "example": 15
+                },
+                "analyzed_period_months": {
+                    "type": "integer",
+                    "example": 12
+                },
+                "change_frequency_seconds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "example": [
+                        86400,
+                        172800,
+                        604800
+                    ]
+                },
+                "needs_changes": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "savings_changes": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "wants_changes": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "api.BudgetHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "budget_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "change_reason": {
+                    "type": "string",
+                    "example": "Salary increase"
+                },
+                "changed_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "new_needs_budget": {
+                    "type": "number",
+                    "example": 2700
+                },
+                "new_savings_budget": {
+                    "type": "number",
+                    "example": 1200
+                },
+                "new_wants_budget": {
+                    "type": "number",
+                    "example": 1300
+                },
+                "old_needs_budget": {
+                    "type": "number",
+                    "example": 2500
+                },
+                "old_savings_budget": {
+                    "type": "number",
+                    "example": 1000
+                },
+                "old_wants_budget": {
+                    "type": "number",
+                    "example": 1500
+                }
+            }
+        },
+        "api.BudgetHistoryStatsResponse": {
+            "type": "object",
+            "properties": {
+                "first_change_date": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "last_change_date": {
+                    "type": "string",
+                    "example": "2024-12-15T10:30:00Z"
+                },
+                "monthly_changes": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "total_changes": {
+                    "type": "integer",
+                    "example": 25
+                }
+            }
+        },
+        "api.BudgetResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "month_year": {
+                    "type": "string",
+                    "example": "2024-01-01"
+                },
+                "needs_budget": {
+                    "type": "number",
+                    "example": 2500
+                },
+                "savings_budget": {
+                    "type": "number",
+                    "example": 1000
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "status_changed_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "total_budget": {
+                    "type": "number",
+                    "example": 5000
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "wants_budget": {
+                    "type": "number",
+                    "example": 1500
+                }
+            }
+        },
+        "api.BudgetsListResponse": {
+            "type": "object",
+            "properties": {
+                "budgets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.BudgetResponse"
+                    }
+                },
+                "count": {
+                    "type": "integer",
+                    "example": 5
+                }
+            }
+        },
+        "api.CategoryResponse": {
+            "type": "object",
+            "properties": {
+                "expense_type": {
+                    "$ref": "#/definitions/api.ExpenseTypeResponse"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Food"
+                }
+            }
+        },
+        "api.ChangeStatusRequest": {
+            "type": "object",
+            "properties": {
+                "reason": {
+                    "type": "string",
+                    "example": "Error in the record"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "inactive"
+                }
+            }
+        },
+        "api.CreateBankAccountRequest": {
+            "type": "object",
+            "properties": {
+                "account_name": {
+                    "type": "string",
+                    "example": "Main Checking Account"
+                },
+                "balance": {
+                    "type": "number",
+                    "example": 2500
+                }
+            }
+        },
+        "api.CreateBudgetRequest": {
+            "type": "object",
+            "properties": {
+                "month_year": {
+                    "type": "string",
+                    "example": "2024-01-01"
+                },
+                "needs_budget": {
+                    "type": "number",
+                    "example": 2500
+                },
+                "savings_budget": {
+                    "type": "number",
+                    "example": 1000
+                },
+                "wants_budget": {
+                    "type": "number",
+                    "example": 1500
+                }
+            }
+        },
+        "api.CreateExpenseRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 150.75
+                },
+                "bank_account_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "category_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "date": {
+                    "type": "string",
+                    "example": "2024-01-15"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Grocery shopping"
+                }
+            }
+        },
+        "api.CreateFixedExpenseRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 1200
+                },
+                "due_date": {
+                    "type": "string",
+                    "example": "2024-01-15"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Monthly Rent"
+                }
+            }
+        },
+        "api.CreateIncomeRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 2500.5
+                },
+                "date": {
+                    "type": "string",
+                    "example": "2024-01-15"
+                }
+            }
+        },
+        "api.CreateUserCategoryRequest": {
+            "type": "object",
+            "properties": {
+                "expense_type_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Groceries"
+                }
+            }
+        },
+        "api.ExpenseResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 150.75
+                },
+                "bank_account": {
+                    "$ref": "#/definitions/api.BankAccountResponse"
+                },
+                "bank_account_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "category": {
+                    "$ref": "#/definitions/api.CategoryResponse"
+                },
+                "category_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "date": {
+                    "type": "string",
+                    "example": "2024-01-15"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Grocery shopping"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "status_changed_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                }
+            }
+        },
+        "api.ExpenseSummaryResponse": {
+            "type": "object",
+            "properties": {
+                "average_amount": {
+                    "type": "number",
+                    "example": 50.03
+                },
+                "by_expense_type": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.ExpensesByTypeResponse"
+                    }
+                },
+                "top_categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.ExpensesByCategoryResponse"
+                    }
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 1250.75
+                },
+                "total_count": {
+                    "type": "integer",
+                    "example": 25
+                }
+            }
+        },
+        "api.ExpenseTypeResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Needs"
+                }
+            }
+        },
+        "api.ExpenseTypesListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "expense_types": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.SimpleExpenseTypeResponse"
+                    }
+                }
+            }
+        },
+        "api.ExpensesByCategoryResponse": {
+            "type": "object",
+            "properties": {
+                "category_name": {
+                    "type": "string",
+                    "example": "Food"
+                },
+                "count": {
+                    "type": "integer",
+                    "example": 8
+                },
+                "expense_type_name": {
+                    "type": "string",
+                    "example": "Needs"
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 325.5
+                }
+            }
+        },
+        "api.ExpensesByTypeResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 15
+                },
+                "expense_type_name": {
+                    "type": "string",
+                    "example": "Needs"
+                },
+                "total_amount": {
+                    "type": "number",
+                    "example": 625
+                }
+            }
+        },
+        "api.ExpensesListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "expenses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.ExpenseResponse"
+                    }
+                }
+            }
+        },
+        "api.FixedExpenseResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 1200
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "due_date": {
+                    "type": "string",
+                    "example": "2024-01-15"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Monthly Rent"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                }
+            }
+        },
+        "api.FixedExpensesListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "fixed_expenses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.FixedExpenseResponse"
+                    }
+                }
+            }
+        },
         "api.HelloResponse": {
             "type": "object",
             "properties": {
@@ -212,6 +4696,54 @@
                 "status": {
                     "type": "string",
                     "example": "success"
+                }
+            }
+        },
+        "api.IncomeResponse": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 2500.5
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "date": {
+                    "type": "string",
+                    "example": "2024-01-15"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "status_changed_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                }
+            }
+        },
+        "api.IncomesListResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "incomes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.IncomeResponse"
+                    }
                 }
             }
         },
@@ -228,15 +4760,11 @@
                 }
             }
         },
-        "api.ProtectedResponse": {
+        "api.RefreshTokenRequest": {
             "type": "object",
             "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "¡Acceso autorizado! Esta es una ruta protegida."
-                },
-                "user": {
-                    "$ref": "#/definitions/api.UserClaims"
+                "refresh_token": {
+                    "type": "string"
                 }
             }
         },
@@ -257,18 +4785,298 @@
                 }
             }
         },
-        "api.UserClaims": {
+        "api.SimpleExpenseTypeResponse": {
             "type": "object",
             "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "usuario@ejemplo.com"
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.UserCategoryResponse"
+                    }
                 },
-                "user_id": {
+                "created_at": {
                     "type": "string",
-                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Needs"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
                 }
             }
+        },
+        "api.SuccessResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.SystemOverviewResponse": {
+            "type": "object",
+            "properties": {
+                "expense_types": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.SimpleExpenseTypeResponse"
+                    }
+                },
+                "expense_types_count": {
+                    "type": "integer",
+                    "example": 3
+                },
+                "system_info": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "api.UpdateBankAccountRequest": {
+            "type": "object",
+            "properties": {
+                "account_name": {
+                    "type": "string",
+                    "example": "Updated Account Name"
+                },
+                "balance": {
+                    "type": "number",
+                    "example": 3000
+                }
+            }
+        },
+        "api.UpdateBudgetRequest": {
+            "type": "object",
+            "properties": {
+                "change_reason": {
+                    "type": "string",
+                    "example": "Salary increase"
+                },
+                "needs_budget": {
+                    "type": "number",
+                    "example": 2700
+                },
+                "savings_budget": {
+                    "type": "number",
+                    "example": 1200
+                },
+                "wants_budget": {
+                    "type": "number",
+                    "example": 1300
+                }
+            }
+        },
+        "api.UpdateExpenseRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 175.5
+                },
+                "bank_account_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "category_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "date": {
+                    "type": "string",
+                    "example": "2024-01-16"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Updated description"
+                }
+            }
+        },
+        "api.UpdateFixedExpenseRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 1300
+                },
+                "due_date": {
+                    "type": "string",
+                    "example": "2024-01-20"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Updated Rent"
+                }
+            }
+        },
+        "api.UpdateIncomeRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 2800.75
+                },
+                "date": {
+                    "type": "string",
+                    "example": "2024-01-16"
+                }
+            }
+        },
+        "api.UpdateUserCategoryRequest": {
+            "type": "object",
+            "properties": {
+                "expense_type_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Groceries Updated"
+                }
+            }
+        },
+        "api.UserCategoriesGroupedResponse": {
+            "type": "object",
+            "properties": {
+                "grouped_categories": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/api.UserCategoryResponse"
+                        }
+                    }
+                },
+                "total_count": {
+                    "type": "integer",
+                    "example": 15
+                }
+            }
+        },
+        "api.UserCategoriesListResponse": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.UserCategoryResponse"
+                    }
+                },
+                "count": {
+                    "type": "integer",
+                    "example": 15
+                }
+            }
+        },
+        "api.UserCategoryExpenseType": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Needs"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                }
+            }
+        },
+        "api.UserCategoryResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "expense_type": {
+                    "$ref": "#/definitions/api.UserCategoryExpenseType"
+                },
+                "expense_type_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Groceries"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "active"
+                },
+                "status_changed_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                }
+            }
+        },
+        "api.UserCategoryStatsResponse": {
+            "type": "object",
+            "properties": {
+                "categories_by_type": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                },
+                "deleted_categories": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "total_categories": {
+                    "type": "integer",
+                    "example": 15
+                }
+            }
+        },
+        "models.Status": {
+            "type": "string",
+            "enum": [
+                "active",
+                "deleted",
+                "suspended",
+                "archived",
+                "pending",
+                "locked"
+            ],
+            "x-enum-varnames": [
+                "StatusActive",
+                "StatusDeleted",
+                "StatusSuspended",
+                "StatusArchived",
+                "StatusPending",
+                "StatusLocked"
+            ]
         },
         "models.User": {
             "type": "object",
@@ -282,13 +5090,34 @@
                 "id": {
                     "type": "string"
                 },
+                "last_login": {
+                    "type": "string"
+                },
                 "monthly_income": {
                     "type": "number"
                 },
                 "name": {
                     "type": "string"
                 },
+                "status": {
+                    "$ref": "#/definitions/models.Status"
+                },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "services.TokenPair": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "description": "seconds until access token expires",
+                    "type": "integer"
+                },
+                "refresh_token": {
                     "type": "string"
                 }
             }

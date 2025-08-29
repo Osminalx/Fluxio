@@ -15,5 +15,6 @@ func GetAllModels() []interface{} {
 		&Transfer{},
 		&Reminder{},
 		&BudgetHistory{},
+		&RefreshToken{},
 	}
 }
