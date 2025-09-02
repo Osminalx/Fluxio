@@ -197,6 +197,12 @@ definitions:
         example: Food
         type: string
     type: object
+  api.ChangeGoalStatusRequest:
+    properties:
+      status:
+        example: active
+        type: string
+    type: object
   api.ChangeStatusRequest:
     properties:
       reason:
@@ -260,6 +266,18 @@ definitions:
         example: Monthly Rent
         type: string
     type: object
+  api.CreateGoalRequest:
+    properties:
+      name:
+        example: Emergency Fund
+        type: string
+      saved_amount:
+        example: 2500
+        type: number
+      total_amount:
+        example: 10000
+        type: number
+    type: object
   api.CreateIncomeRequest:
     properties:
       amount:
@@ -276,6 +294,15 @@ definitions:
         type: string
       name:
         example: Groceries
+        type: string
+    type: object
+  api.ErrorResponse:
+    properties:
+      error:
+        example: Invalid request format
+        type: string
+      message:
+        example: Additional error details
         type: string
     type: object
   api.ExpenseResponse:
@@ -423,6 +450,46 @@ definitions:
       fixed_expenses:
         items:
           $ref: '#/definitions/api.FixedExpenseResponse'
+        type: array
+    type: object
+  api.GoalResponse:
+    properties:
+      created_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      name:
+        example: Emergency Fund
+        type: string
+      progress_percent:
+        example: 25
+        type: number
+      saved_amount:
+        example: 2500
+        type: number
+      status:
+        example: active
+        type: string
+      status_changed_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      total_amount:
+        example: 10000
+        type: number
+      updated_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+    type: object
+  api.GoalsListResponse:
+    properties:
+      count:
+        example: 3
+        type: integer
+      goals:
+        items:
+          $ref: '#/definitions/api.GoalResponse'
         type: array
     type: object
   api.HelloResponse:
@@ -587,6 +654,18 @@ definitions:
       name:
         example: Updated Rent
         type: string
+    type: object
+  api.UpdateGoalRequest:
+    properties:
+      name:
+        example: Updated Goal Name
+        type: string
+      saved_amount:
+        example: 3500
+        type: number
+      total_amount:
+        example: 12000
+        type: number
     type: object
   api.UpdateIncomeRequest:
     properties:
@@ -2299,6 +2378,303 @@ paths:
       summary: Update a fixed expense
       tags:
       - fixed_expense
+  /api/v1/goals:
+    get:
+      description: Retrieves all goals for the authenticated user (active and deleted)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.GoalsListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Get all goals
+      tags:
+      - goals
+    post:
+      consumes:
+      - application/json
+      description: Creates a new savings goal for the authenticated user
+      parameters:
+      - description: Goal data
+        in: body
+        name: goal
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateGoalRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.GoalResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Create a new goal
+      tags:
+      - goals
+  /api/v1/goals/{id}:
+    delete:
+      description: Soft deletes a goal (changes status to deleted)
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: Goal deleted successfully
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Delete goal
+      tags:
+      - goals
+    get:
+      description: Retrieves a specific goal by its ID for the authenticated user
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.GoalResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Get goal by ID
+      tags:
+      - goals
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing goal for the authenticated user
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated goal data
+        in: body
+        name: goal
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateGoalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.GoalResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Update goal
+      tags:
+      - goals
+  /api/v1/goals/{id}/restore:
+    post:
+      description: Restores a deleted goal (changes status back to active)
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.GoalResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Restore goal
+      tags:
+      - goals
+  /api/v1/goals/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Changes the status of a goal (active, deleted, etc.)
+      parameters:
+      - description: Goal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New status
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/api.ChangeGoalStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.GoalResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Change goal status
+      tags:
+      - goals
+  /api/v1/goals/active:
+    get:
+      description: Retrieves only active goals for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.GoalsListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Get active goals
+      tags:
+      - goals
+  /api/v1/goals/deleted:
+    get:
+      description: Retrieves only deleted goals for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.GoalsListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - bearerAuth: []
+      summary: Get deleted goals
+      tags:
+      - goals
   /api/v1/hello:
     get:
       consumes:

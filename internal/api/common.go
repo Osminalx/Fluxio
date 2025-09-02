@@ -11,7 +11,12 @@ type ChangeStatusRequest struct {
 	Reason *string `json:"reason,omitempty" example:"Error in the record"`
 }
 
-// Common response structures  
+// Common response structures
+type ErrorResponse struct {
+	Error   string `json:"error" example:"Invalid request format"`
+	Message string `json:"message,omitempty" example:"Additional error details"`
+}
+
 type BankAccountResponse struct {
 	ID          string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
 	AccountName string  `json:"account_name" example:"Main Checking"`

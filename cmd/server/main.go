@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/MarceloPetrucio/go-scalar-api-reference"
 	"github.com/Osminalx/fluxio/docs"
 	"github.com/Osminalx/fluxio/internal/api"
 	"github.com/Osminalx/fluxio/internal/auth"
@@ -31,7 +32,6 @@ import (
 	"github.com/Osminalx/fluxio/internal/middleware"
 	"github.com/Osminalx/fluxio/pkg/utils/logger"
 	"github.com/joho/godotenv"
-	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 // @title Fluxio API
@@ -429,6 +429,66 @@ func handleBudgetHistoryRoutes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// handleGoalRoutes manages routing for goal endpoints
+func handleGoalRoutes(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+	
+	switch {
+	case path == "/api/v1/goals":
+		switch r.Method {
+		case http.MethodGet:
+			api.GetAllGoalsHandler(w, r)
+		case http.MethodPost:
+			api.CreateGoalHandler(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	case path == "/api/v1/goals/active":
+		if r.Method == http.MethodGet {
+			api.GetActiveGoalsHandler(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	case path == "/api/v1/goals/deleted":
+		if r.Method == http.MethodGet {
+			api.GetDeletedGoalsHandler(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	case strings.HasPrefix(path, "/api/v1/goals/") && strings.HasSuffix(path, "/restore"):
+		if r.Method == http.MethodPost {
+			api.RestoreGoalHandler(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	case strings.HasPrefix(path, "/api/v1/goals/") && strings.HasSuffix(path, "/status"):
+		if r.Method == http.MethodPatch {
+			api.ChangeGoalStatusHandler(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	case strings.HasPrefix(path, "/api/v1/goals/"):
+		switch r.Method {
+		case http.MethodGet:
+			api.GetGoalByIDHandler(w, r)
+		case http.MethodPatch:
+			api.UpdateGoalHandler(w, r)
+		case http.MethodDelete:
+			api.DeleteGoalHandler(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	default:
+		http.Error(w, "Not found", http.StatusNotFound)
+	}
+}
+
 // handleUserCategoryRoutes manages routing for user category endpoints
 func handleUserCategoryRoutes(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
@@ -639,6 +699,10 @@ func main() {
 	protectedMux.HandleFunc("/api/v1/budget-history", handleBudgetHistoryRoutes)
 	protectedMux.HandleFunc("/api/v1/budget-history/", handleBudgetHistoryRoutes)
 	
+	// Goal endpoints - PROTECTED
+	protectedMux.HandleFunc("/api/v1/goals", handleGoalRoutes)
+	protectedMux.HandleFunc("/api/v1/goals/", handleGoalRoutes)
+	
 	// User Category endpoints - PROTECTED
 	protectedMux.HandleFunc("/api/v1/user-categories", handleUserCategoryRoutes)
 	protectedMux.HandleFunc("/api/v1/user-categories/", handleUserCategoryRoutes)
@@ -661,17 +725,39 @@ func main() {
 	mux.Handle("/api/v1/fixed-expenses/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/budget-history", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/budget-history/", auth.AuthMiddleware(protectedMux))
+	mux.Handle("/api/v1/goals", auth.AuthMiddleware(protectedMux))
+	mux.Handle("/api/v1/goals/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/user-categories", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/user-categories/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/expense-types/with-categories", auth.AuthMiddleware(protectedMux))
 
-	// Swagger UI (public access - no versioning needed)
-	mux.HandleFunc("/swagger/", httpSwagger.Handler(
-		httpSwagger.URL("http://localhost:8080/swagger/doc.json"),
-		httpSwagger.DeepLinking(true),
-		httpSwagger.DocExpansion("none"),
-		httpSwagger.DomID("swagger-ui"),
-	))
+	// Serve swagger.json file
+	mux.HandleFunc("/docs/swagger.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		http.ServeFile(w, r, "docs/swagger.json")
+	})
+
+	// Scalar API Reference (public access - no versioning needed)
+	mux.HandleFunc("/reference", func(w http.ResponseWriter, r *http.Request) {
+		htmlContent, err := scalar.ApiReferenceHTML(&scalar.Options{
+			SpecURL: "http://localhost:8080/docs/swagger.json",
+			CustomOptions: scalar.CustomOptions{
+				PageTitle: "Fluxio API Documentation",
+			},
+			DarkMode: true,
+		})
+
+		if err != nil {
+			http.Error(w, "Error generating API documentation", http.StatusInternalServerError)
+			logger.Error("Error generating Scalar documentation: %v", err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(htmlContent))
+	})
 	
 	// Health check endpoint (no versioning)
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -732,6 +818,14 @@ func main() {
 	logger.Info("  GET       /api/v1/budget-history/patterns - Patrones para ML")
 	logger.Info("  GET       /api/v1/budgets/{id}/history - Historial de presupuesto")
 	logger.Info("")
+	logger.Info("🎯 Goal endpoints (requieren JWT):")
+	logger.Info("  GET/POST  /api/v1/goals - CRUD básico")
+	logger.Info("  GET       /api/v1/goals/{id} - Por ID")
+	logger.Info("  PATCH/DEL /api/v1/goals/{id} - Actualizar/eliminar")
+	logger.Info("  GET       /api/v1/goals/active|deleted - Por estado")
+	logger.Info("  POST      /api/v1/goals/{id}/restore - Restaurar")
+	logger.Info("  PATCH     /api/v1/goals/{id}/status - Cambiar estado")
+	logger.Info("")
 	logger.Info("🏷️  User Category endpoints (requieren JWT):")
 	logger.Info("  GET/POST  /api/v1/user-categories - CRUD básico")
 	logger.Info("  GET       /api/v1/user-categories/{id} - Por ID")
@@ -755,7 +849,8 @@ func main() {
 	logger.Info("")
 	logger.Info("📚 Otros endpoints:")
 	logger.Info("  GET  /health - Health check")
-	logger.Info("  GET  /swagger/index.html - Swagger UI")
+	logger.Info("  GET  /docs/swagger.json - OpenAPI specification")
+	logger.Info("  GET  /reference - Scalar API Documentation")
 
 	// Apply logging middleware to all routes
 	handler := middleware.LoggingMiddleware(mux)
