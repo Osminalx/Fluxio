@@ -632,6 +632,105 @@ func handleSetupRoutes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// handleReminderRoutes manages routing for reminder endpoints
+func handleReminderRoutes(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+	
+	switch {
+	case path == "/api/v1/reminders":
+		switch r.Method {
+		case http.MethodGet:
+			api.GetAllRemindersHandler(w, r)
+		case http.MethodPost:
+			api.CreateReminderHandler(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	case path == "/api/v1/reminders/overdue":
+		if r.Method == http.MethodGet {
+			api.GetOverdueRemindersHandler(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	case path == "/api/v1/reminders/stats":
+		if r.Method == http.MethodGet {
+			api.GetReminderStatsHandler(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	case strings.HasPrefix(path, "/api/v1/reminders/") && strings.HasSuffix(path, "/complete"):
+		if r.Method == http.MethodPost {
+			api.CompleteReminderHandler(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	case strings.HasPrefix(path, "/api/v1/reminders/"):
+		switch r.Method {
+		case http.MethodGet:
+			api.GetReminderByIDHandler(w, r)
+		case http.MethodPatch:
+			api.UpdateReminderHandler(w, r)
+		case http.MethodDelete:
+			api.DeleteReminderHandler(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	default:
+		http.Error(w, "Not found", http.StatusNotFound)
+	}
+}
+
+// handleTransferRoutes manages routing for transfer endpoints
+func handleTransferRoutes(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+	
+	switch {
+	case path == "/api/v1/transfers":
+		switch r.Method {
+		case http.MethodGet:
+			api.GetAllTransfersHandler(w, r)
+		case http.MethodPost:
+			api.CreateTransferHandler(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	case path == "/api/v1/transfers/stats":
+		if r.Method == http.MethodGet {
+			api.GetTransferStatsHandler(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	case strings.HasPrefix(path, "/api/v1/transfers/account/"):
+		if r.Method == http.MethodGet {
+			api.GetTransfersByAccountHandler(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	case strings.HasPrefix(path, "/api/v1/transfers/"):
+		switch r.Method {
+		case http.MethodGet:
+			api.GetTransferByIDHandler(w, r)
+		case http.MethodPatch:
+			api.UpdateTransferHandler(w, r)
+		case http.MethodDelete:
+			api.DeleteTransferHandler(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	default:
+		http.Error(w, "Not found", http.StatusNotFound)
+	}
+}
+
 func main() {
 	// Load environment variables
 	if err := godotenv.Load(); err != nil {
@@ -707,6 +806,14 @@ func main() {
 	protectedMux.HandleFunc("/api/v1/user-categories", handleUserCategoryRoutes)
 	protectedMux.HandleFunc("/api/v1/user-categories/", handleUserCategoryRoutes)
 	
+	// Reminder endpoints - PROTECTED
+	protectedMux.HandleFunc("/api/v1/reminders", handleReminderRoutes)
+	protectedMux.HandleFunc("/api/v1/reminders/", handleReminderRoutes)
+	
+	// Transfer endpoints - PROTECTED
+	protectedMux.HandleFunc("/api/v1/transfers", handleTransferRoutes)
+	protectedMux.HandleFunc("/api/v1/transfers/", handleTransferRoutes)
+	
 	// Expense Types endpoints - PROTECTED (for endpoints that need user context)
 	protectedMux.HandleFunc("/api/v1/expense-types", handleExpenseTypeRoutes)
 	protectedMux.HandleFunc("/api/v1/expense-types/", handleExpenseTypeRoutes)
@@ -729,6 +836,10 @@ func main() {
 	mux.Handle("/api/v1/goals/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/user-categories", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/user-categories/", auth.AuthMiddleware(protectedMux))
+	mux.Handle("/api/v1/reminders", auth.AuthMiddleware(protectedMux))
+	mux.Handle("/api/v1/reminders/", auth.AuthMiddleware(protectedMux))
+	mux.Handle("/api/v1/transfers", auth.AuthMiddleware(protectedMux))
+	mux.Handle("/api/v1/transfers/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/expense-types/with-categories", auth.AuthMiddleware(protectedMux))
 
 	// Serve swagger.json file
@@ -846,6 +957,21 @@ func main() {
 	logger.Info("  POST      /api/v1/setup/initialize - Inicializar sistema")
 	logger.Info("  POST      /api/v1/setup/user - Configurar usuario nuevo")
 	logger.Info("  GET       /api/v1/setup/overview - Vista general del sistema")
+	logger.Info("")
+	logger.Info("🔔 Reminder endpoints (requieren JWT):")
+	logger.Info("  GET/POST  /api/v1/reminders - CRUD básico")
+	logger.Info("  GET       /api/v1/reminders/{id} - Por ID")
+	logger.Info("  PATCH/DEL /api/v1/reminders/{id} - Actualizar/eliminar")
+	logger.Info("  GET       /api/v1/reminders/overdue - Recordatorios vencidos")
+	logger.Info("  GET       /api/v1/reminders/stats - Estadísticas")
+	logger.Info("  POST      /api/v1/reminders/{id}/complete - Marcar como completado")
+	logger.Info("")
+	logger.Info("🔄 Transfer endpoints (requieren JWT):")
+	logger.Info("  GET/POST  /api/v1/transfers - CRUD básico")
+	logger.Info("  GET       /api/v1/transfers/{id} - Por ID")
+	logger.Info("  PATCH/DEL /api/v1/transfers/{id} - Actualizar/eliminar")
+	logger.Info("  GET       /api/v1/transfers/stats - Estadísticas")
+	logger.Info("  GET       /api/v1/transfers/account/{id} - Por cuenta bancaria")
 	logger.Info("")
 	logger.Info("📚 Otros endpoints:")
 	logger.Info("  GET  /health - Health check")

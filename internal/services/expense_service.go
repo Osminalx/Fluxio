@@ -12,11 +12,11 @@ import (
 
 // CreateExpense creates a new expense for the user
 func CreateExpense(userID string, expense *models.Expense) error {
-	// Forzar el UserID y Status para que no puedan ser manipulados
+	// Force the UserID and Status to prevent manipulation
 	expense.UserID = uuid.MustParse(userID)
 	expense.Status = models.StatusActive
 	
-	// Verificar que la categoría existe y está activa
+	// Verify that the category exists and is active
 	var category models.Category
 	result := db.DB.Where("id = ? AND status IN ?", expense.CategoryID, models.GetActiveStatuses()).First(&category)
 	if result.Error != nil {
@@ -24,7 +24,7 @@ func CreateExpense(userID string, expense *models.Expense) error {
 		return errors.New("category not found or not active")
 	}
 	
-	// Verificar que la cuenta bancaria existe, está activa y pertenece al usuario
+	// Verify that the bank account exists, is active and belongs to the user
 	var bankAccount models.BankAccount
 	result = db.DB.Where("id = ? AND user_id = ? AND status IN ?", 
 		expense.BankAccountID, userID, models.GetActiveStatuses()).First(&bankAccount)
@@ -33,7 +33,7 @@ func CreateExpense(userID string, expense *models.Expense) error {
 		return errors.New("bank account not found, not active, or access denied")
 	}
 	
-	// Validar que el monto es positivo
+	// Verify that the amount is positive
 	if expense.Amount <= 0 {
 		logger.Error("Expense amount must be positive")
 		return errors.New("expense amount must be positive")
@@ -695,7 +695,7 @@ func calculateSpendingVolatility(expenses []models.Expense) float64 {
 		return 0
 	}
 	
-	// Calcular desviación estándar de los montos
+	// Calculate the mean
 	total := 0.0
 	for _, expense := range expenses {
 		total += expense.Amount
@@ -708,7 +708,7 @@ func calculateSpendingVolatility(expenses []models.Expense) float64 {
 	}
 	variance /= float64(len(expenses))
 	
-	return variance // Varianza como medida de volatilidad
+	return variance // Variance as a measure of volatility
 }
 
 func getMostActiveDay(expenses []models.Expense) int {
@@ -752,13 +752,13 @@ func getTypicalExpenseSize(expenses []models.Expense) float64 {
 		return 0
 	}
 	
-	// Calcular mediana como medida de "típico"
+	// Calculate median as a measure of "typical"
 	amounts := make([]float64, len(expenses))
 	for i, expense := range expenses {
 		amounts[i] = expense.Amount
 	}
 	
-	// Ordenar para encontrar mediana (implementación simple)
+	// Sort to find median (simple implementation)
 	for i := 0; i < len(amounts); i++ {
 		for j := i + 1; j < len(amounts); j++ {
 			if amounts[i] > amounts[j] {

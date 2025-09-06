@@ -1,8 +1,6 @@
 package services
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"errors"
 	"time"
 
@@ -49,38 +47,21 @@ func GenerateTokenPair(user *models.User) (*TokenPair, error) {
 		return nil, err
 	}
 
-	// Generate refresh token (long-lived)
-	refreshToken, err := generateRefreshToken()
+	// Use the new RefreshTokenService to create refresh token
+	refreshTokenService := NewRefreshTokenService()
+	refreshTokenModel, err := refreshTokenService.CreateRefreshToken(user.ID, 7) // 7 days
 	if err != nil {
-		return nil, err
-	}
-
-	// Store refresh token in database
-	refreshTokenModel := &models.RefreshToken{
-		UserID:    user.ID,
-		Token:     refreshToken,
-		ExpiresAt: time.Now().Add(7 * 24 * time.Hour), // 7 days
-	}
-
-	if err := db.DB.Create(refreshTokenModel).Error; err != nil {
 		return nil, err
 	}
 
 	return &TokenPair{
 		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		RefreshToken: refreshTokenModel.Token,
 		ExpiresIn:    15 * 60, // 15 minutes in seconds
 	}, nil
 }
 
-// generateRefreshToken creates a secure random refresh token
-func generateRefreshToken() (string, error) {
-	bytes := make([]byte, 32)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(bytes), nil
-}
+// generateRefreshToken is now handled by RefreshTokenService
 
 func ValidateToken(tokenString string) (*jwt.Token, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
@@ -117,53 +98,5 @@ func GetUserByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
-// RefreshAccessToken validates a refresh token and generates a new access token
-func RefreshAccessToken(refreshTokenStr string) (*TokenPair, error) {
-	// Find the refresh token in database
-	var refreshToken models.RefreshToken
-	if err := db.DB.Where("token = ? AND is_revoked = false", refreshTokenStr).First(&refreshToken).Error; err != nil {
-		return nil, errors.New("invalid refresh token")
-	}
-
-	// Check if token is expired
-	if !refreshToken.IsValid() {
-		return nil, errors.New("refresh token expired")
-	}
-
-	// Get the user
-	var user models.User
-	if err := db.DB.Where("id = ?", refreshToken.UserID).First(&user).Error; err != nil {
-		return nil, errors.New("user not found")
-	}
-
-	// Revoke old refresh token
-	refreshToken.IsRevoked = true
-	db.DB.Save(&refreshToken)
-
-	// Generate new token pair
-	return GenerateTokenPair(&user)
-}
-
-// RevokeRefreshToken revokes a refresh token (for logout)
-func RevokeRefreshToken(refreshTokenStr string) error {
-	var refreshToken models.RefreshToken
-	if err := db.DB.Where("token = ?", refreshTokenStr).First(&refreshToken).Error; err != nil {
-		return errors.New("refresh token not found")
-	}
-
-	refreshToken.IsRevoked = true
-	return db.DB.Save(&refreshToken).Error
-}
-
-// RevokeAllUserTokens revokes all refresh tokens for a user (for logout all devices)
-func RevokeAllUserTokens(userID string) error {
-	return db.DB.Model(&models.RefreshToken{}).
-		Where("user_id = ? AND is_revoked = false", userID).
-		Update("is_revoked", true).Error
-}
-
-// CleanupExpiredTokens removes expired refresh tokens from database
-func CleanupExpiredTokens() error {
-	return db.DB.Where("expires_at < ? OR is_revoked = true", time.Now()).
-		Delete(&models.RefreshToken{}).Error
-}
+// Note: Refresh token functions have been moved to RefreshTokenService
+// Use services.NewRefreshTokenService() for refresh token operations

@@ -6,6 +6,7 @@ import (
 
 	"github.com/Osminalx/fluxio/internal/services"
 	"github.com/Osminalx/fluxio/pkg/utils/logger"
+	"github.com/google/uuid"
 )
 
 type RefreshTokenRequest struct {
@@ -42,12 +43,29 @@ func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Generate new token pair
-	tokenPair, err := services.RefreshAccessToken(req.RefreshToken)
+	// Create refresh token service instance
+	refreshTokenService := services.NewRefreshTokenService()
+	
+	// Validate refresh token and get user
+	user, err := refreshTokenService.ValidateRefreshToken(req.RefreshToken)
 	if err != nil {
 		logger.Warn("Failed refresh token attempt: %v", err)
 		http.Error(w, "Invalid or expired refresh token", http.StatusUnauthorized)
 		return
+	}
+
+	// Generate new token pair using auth service
+	tokenPair, err := services.GenerateTokenPair(user)
+	if err != nil {
+		logger.Error("Error generating new token pair: %v", err)
+		http.Error(w, "Error generating tokens", http.StatusInternalServerError)
+		return
+	}
+
+	// Revoke the old refresh token
+	if err := refreshTokenService.RevokeRefreshToken(req.RefreshToken); err != nil {
+		logger.Warn("Failed to revoke old refresh token: %v", err)
+		// Continue anyway, as the new token was generated successfully
 	}
 
 	logger.Info("Token refreshed successfully")
@@ -85,8 +103,11 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create refresh token service instance
+	refreshTokenService := services.NewRefreshTokenService()
+	
 	// Revoke the refresh token
-	if err := services.RevokeRefreshToken(req.RefreshToken); err != nil {
+	if err := refreshTokenService.RevokeRefreshToken(req.RefreshToken); err != nil {
 		logger.Error("Error revoking refresh token: %v", err)
 		http.Error(w, "Error during logout", http.StatusInternalServerError)
 		return
@@ -118,14 +139,25 @@ func LogoutAllHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get userID from context (set by auth middleware)
-	userID, ok := r.Context().Value("userID").(string)
+	userIDStr, ok := r.Context().Value("userID").(string)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
+	// Parse userID to UUID
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		logger.Error("Invalid userID format: %v", err)
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	// Create refresh token service instance
+	refreshTokenService := services.NewRefreshTokenService()
+	
 	// Revoke all refresh tokens for this user
-	if err := services.RevokeAllUserTokens(userID); err != nil {
+	if err := refreshTokenService.RevokeAllUserRefreshTokens(userID); err != nil {
 		logger.Error("Error revoking all user tokens: %v", err)
 		http.Error(w, "Error during logout", http.StatusInternalServerError)
 		return
