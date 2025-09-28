@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/Osminalx/fluxio/internal/db"
 	"github.com/Osminalx/fluxio/internal/models"
@@ -134,6 +135,66 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	response := AuthResponse{
 		Token: token,
 		User:  user,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// UserProfileResponse represents the response for the /me endpoint
+type UserProfileResponse struct {
+	ID        string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Email     string `json:"email" example:"user@example.com"`
+	Name      string `json:"name" example:"John Doe"`
+	CreatedAt string `json:"createdAt" example:"2023-01-01T00:00:00Z"`
+	UpdatedAt string `json:"updatedAt" example:"2023-12-01T00:00:00Z"`
+}
+
+// MeHandler godoc
+// @Summary Obtener información del usuario actual
+// @Description Devuelve la información del usuario autenticado basada en el token JWT
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security bearerAuth
+// @Success 200 {object} UserProfileResponse
+// @Failure 401 {string} string "Token inválido o expirado"
+// @Failure 404 {string} string "Usuario no encontrado"
+// @Failure 500 {string} string "Error interno del servidor"
+// @Router /api/v1/auth/me [get]
+func MeHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get user ID from context (set by AuthMiddleware)
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	// Get user from database
+	user, err := services.GetUserByID(userID)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	// Check if user is accessible (not deleted/suspended)
+	if !user.IsAccessible() {
+		http.Error(w, "User account is not accessible", http.StatusForbidden)
+		return
+	}
+
+	// Create response
+	response := UserProfileResponse{
+		ID:        user.ID.String(),
+		Email:     user.Email,
+		Name:      user.Name,
+		CreatedAt: user.CreatedAt.Format(time.RFC3339),
+		UpdatedAt: user.UpdatedAt.Format(time.RFC3339),
 	}
 
 	w.Header().Set("Content-Type", "application/json")

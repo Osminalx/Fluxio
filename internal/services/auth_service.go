@@ -98,5 +98,14 @@ func GetUserByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
+func GetUserByID(userID string) (*models.User, error) {
+	var user models.User
+	result := db.DB.Where("id = ?", userID).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
+}
+
 // Note: Refresh token functions have been moved to RefreshTokenService
 // Use services.NewRefreshTokenService() for refresh token operations

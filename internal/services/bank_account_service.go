@@ -139,13 +139,13 @@ func SoftDeleteBankAccount(userID string, id string) error {
 	return nil
 }
 
-func RestoreBankAccount(userID string, id string) error {
-	// Check if the account exists, belongs to the user and is deleted
+func RestoreBankAccount(userID string, id string) (*models.BankAccount, error) {
+	// Check if the account exists, belongs to the user and is in a restorable state (deleted, archived, or locked)
 	var existingAccount models.BankAccount
-	result := db.DB.Where("user_id = ? AND id = ? AND status = ?", userID, id, models.StatusDeleted).First(&existingAccount)
+	result := db.DB.Where("user_id = ? AND id = ? AND status IN ?", userID, id, []models.Status{models.StatusDeleted, models.StatusArchived, models.StatusLocked}).First(&existingAccount)
 	if result.Error != nil {
-		logger.Error("Bank account not found, not deleted, or access denied: %v", result.Error)
-		return errors.New("bank account not found, not deleted, or access denied")
+		logger.Error("Bank account not found, not restorable, or access denied: %v", result.Error)
+		return nil, errors.New("bank account not found, not restorable, or access denied")
 	}
 	
 	// Restore as active
@@ -157,11 +157,18 @@ func RestoreBankAccount(userID string, id string) error {
 	
 	if result.Error != nil{
 		logger.Error("Error restoring bank account: %v", result.Error)
-		return result.Error
+		return nil, result.Error
+	}
+	
+	// Get the updated bank account
+	updatedAccount, err := GetBankAccountByID(userID, id)
+	if err != nil {
+		logger.Error("Error retrieving updated bank account: %v", err)
+		return nil, errors.New("error retrieving updated bank account")
 	}
 	
 	logger.Info("Bank account restored successfully: %s", id)
-	return nil
+	return updatedAccount, nil
 }
 
 func ChangeAccountStatus(userID string, id string, newStatus models.Status, reason *string) error {

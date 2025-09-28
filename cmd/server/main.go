@@ -763,6 +763,8 @@ func main() {
 	mux.HandleFunc("/api/v1/auth/logout", api.LogoutHandler)
 	mux.HandleFunc("/api/v1/auth/logout-all", api.LogoutAllHandler)
 	
+	
+	
 	// Expense Types endpoints - PUBLIC (read-only, no auth needed for basic info)
 	mux.HandleFunc("/api/v1/expense-types", handleExpenseTypeRoutes)
 	mux.HandleFunc("/api/v1/expense-types/", handleExpenseTypeRoutes)
@@ -773,6 +775,9 @@ func main() {
 
 	// API v1 routes - PROTECTED (require authentication)
 	protectedMux := http.NewServeMux()
+	
+	// Auth endpoints - PROTECTED
+	protectedMux.HandleFunc("/api/v1/auth/me", api.MeHandler)
 	
 	// Income endpoints - PROTECTED
 	protectedMux.HandleFunc("/api/v1/incomes", handleIncomeRoutes)
@@ -820,6 +825,7 @@ func main() {
 	
 	// Apply auth middleware to protected API v1 routes
 	mux.Handle("/api/v1/protected/", auth.AuthMiddleware(protectedMux))
+	mux.Handle("/api/v1/auth/me", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/incomes", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/incomes/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/expenses", auth.AuthMiddleware(protectedMux))

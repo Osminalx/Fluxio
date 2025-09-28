@@ -216,13 +216,13 @@ func SoftDeleteUserCategory(userID string, id string) error {
 }
 
 // RestoreUserCategory restores a deleted user category
-func RestoreUserCategory(userID string, id string) error {
+func RestoreUserCategory(userID string, id string) (*models.Category, error) {
 	// Check if the category exists, belongs to the user and is deleted
 	var existingCategory models.Category
 	result := db.DB.Where("user_id = ? AND id = ? AND status = ?", userID, id, models.StatusDeleted).First(&existingCategory)
 	if result.Error != nil {
 		logger.Error("User category not found, not deleted, or access denied: %v", result.Error)
-		return errors.New("category not found, not deleted, or access denied")
+		return nil, errors.New("category not found, not deleted, or access denied")
 	}
 	
 	// Check if the ExpenseType is active
@@ -230,7 +230,7 @@ func RestoreUserCategory(userID string, id string) error {
 	result = db.DB.Where("id = ? AND status IN ?", existingCategory.ExpenseTypeID, models.GetActiveStatuses()).First(&expenseType)
 	if result.Error != nil {
 		logger.Error("Cannot restore category: expense type is not active")
-		return errors.New("cannot restore category: expense type is not active")
+		return nil, errors.New("cannot restore category: expense type is not active")
 	}
 	
 	// Check if there is a conflict of names
@@ -239,7 +239,7 @@ func RestoreUserCategory(userID string, id string) error {
 		existingCategory.Name, userID, existingCategory.ExpenseTypeID, id, models.GetActiveStatuses()).First(&duplicateCategory)
 	if checkResult.Error == nil {
 		logger.Error("Cannot restore: category name already exists for this user in this expense type")
-		return errors.New("cannot restore: you already have a category with this name in this expense type")
+		return nil, errors.New("cannot restore: you already have a category with this name in this expense type")
 	}
 	
 	// Restore as active
@@ -251,11 +251,18 @@ func RestoreUserCategory(userID string, id string) error {
 	
 	if result.Error != nil {
 		logger.Error("Error restoring user category: %v", result.Error)
-		return result.Error
+		return nil, result.Error
+	}
+	
+	// Get the updated category
+	updatedCategory, err := GetUserCategoryByID(userID, id)
+	if err != nil {
+		logger.Error("Error retrieving updated category: %v", err)
+		return nil, errors.New("error retrieving updated category")
 	}
 	
 	logger.Info("User category restored successfully: %s", id)
-	return nil
+	return updatedCategory, nil
 }
 
 // CreateDefaultUserCategories creates default categories for a new user

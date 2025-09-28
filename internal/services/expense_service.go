@@ -275,13 +275,13 @@ func SoftDeleteExpense(userID string, id string) error {
 }
 
 // RestoreExpense restores a deleted expense for the user
-func RestoreExpense(userID string, id string) error {
+func RestoreExpense(userID string, id string) (*models.Expense, error) {
 	// Verificar que el gasto existe, pertenece al usuario y está eliminado
 	var existingExpense models.Expense
 	result := db.DB.Where("user_id = ? AND id = ? AND status = ?", userID, id, models.StatusDeleted).First(&existingExpense)
 	if result.Error != nil {
 		logger.Error("Expense not found, not deleted, or access denied: %v", result.Error)
-		return errors.New("expense not found, not deleted, or access denied")
+		return nil, errors.New("expense not found, not deleted, or access denied")
 	}
 	
 	// Verificar que la categoría y cuenta bancaria siguen activas
@@ -289,7 +289,7 @@ func RestoreExpense(userID string, id string) error {
 	result = db.DB.Where("id = ? AND status IN ?", existingExpense.CategoryID, models.GetActiveStatuses()).First(&category)
 	if result.Error != nil {
 		logger.Error("Cannot restore expense: category is not active")
-		return errors.New("cannot restore expense: category is not active")
+		return nil, errors.New("cannot restore expense: category is not active")
 	}
 	
 	var bankAccount models.BankAccount
@@ -297,7 +297,7 @@ func RestoreExpense(userID string, id string) error {
 		existingExpense.BankAccountID, userID, models.GetActiveStatuses()).First(&bankAccount)
 	if result.Error != nil {
 		logger.Error("Cannot restore expense: bank account is not active")
-		return errors.New("cannot restore expense: bank account is not active")
+		return nil, errors.New("cannot restore expense: bank account is not active")
 	}
 	
 	// Restaurar como activo
@@ -309,18 +309,25 @@ func RestoreExpense(userID string, id string) error {
 	
 	if result.Error != nil {
 		logger.Error("Error restoring expense: %v", result.Error)
-		return result.Error
+		return nil, result.Error
+	}
+	
+	// Get the updated expense with all relationships
+	updatedExpense, err := GetExpenseByID(userID, id)
+	if err != nil {
+		logger.Error("Error retrieving updated expense: %v", err)
+		return nil, errors.New("error retrieving updated expense")
 	}
 	
 	logger.Info("Expense restored successfully: %s", id)
-	return nil
+	return updatedExpense, nil
 }
 
 // ChangeExpenseStatus changes the status of an expense for the user
-func ChangeExpenseStatus(userID string, id string, newStatus models.Status, reason *string) error {
+func ChangeExpenseStatus(userID string, id string, newStatus models.Status, reason *string) (*models.Expense, error) {
 	// Validar que el status es válido
 	if !models.ValidateStatus(newStatus) {
-		return errors.New("invalid status")
+		return nil, errors.New("invalid status")
 	}
 	
 	// Verificar que el gasto existe y pertenece al usuario
@@ -328,12 +335,17 @@ func ChangeExpenseStatus(userID string, id string, newStatus models.Status, reas
 	result := db.DB.Where("user_id = ? AND id = ?", userID, id).First(&existingExpense)
 	if result.Error != nil {
 		logger.Error("Expense not found: %v", result.Error)
-		return errors.New("expense not found or access denied")
+		return nil, errors.New("expense not found or access denied")
 	}
 	
-	// No hacer nada si ya tiene ese status
+	// No hacer nada si ya tiene ese status - return current expense
 	if existingExpense.Status == newStatus {
-		return nil
+		updatedExpense, err := GetExpenseByID(userID, id)
+		if err != nil {
+			logger.Error("Error retrieving expense: %v", err)
+			return nil, errors.New("error retrieving expense")
+		}
+		return updatedExpense, nil
 	}
 	
 	// Actualizar status
@@ -346,11 +358,18 @@ func ChangeExpenseStatus(userID string, id string, newStatus models.Status, reas
 	result = db.DB.Model(&existingExpense).Updates(updates)
 	if result.Error != nil {
 		logger.Error("Error changing expense status: %v", result.Error)
-		return result.Error
+		return nil, result.Error
+	}
+	
+	// Get the updated expense with all relationships
+	updatedExpense, err := GetExpenseByID(userID, id)
+	if err != nil {
+		logger.Error("Error retrieving updated expense: %v", err)
+		return nil, errors.New("error retrieving updated expense")
 	}
 	
 	logger.Info("Expense status changed to %s successfully: %s", newStatus, id)
-	return nil
+	return updatedExpense, nil
 }
 
 // HardDeleteExpense permanently deletes an expense for the user

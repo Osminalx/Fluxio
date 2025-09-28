@@ -143,13 +143,13 @@ func SoftDeleteIncome(userID string, id string) error {
 	return nil
 }
 
-func RestoreIncome(userID string, id string) error {
+func RestoreIncome(userID string, id string) (*models.Income, error) {
 	// Verificar que el income existe, pertenece al usuario y está eliminado
 	var existingIncome models.Income
 	result := db.DB.Where("user_id = ? AND id = ? AND status = ?", userID, id, models.StatusDeleted).First(&existingIncome)
 	if result.Error != nil {
 		logger.Error("Income not found, not deleted, or access denied: %v", result.Error)
-		return errors.New("income not found, not deleted, or access denied")
+		return nil, errors.New("income not found, not deleted, or access denied")
 	}
 	
 	// Restaurar como activo
@@ -161,17 +161,24 @@ func RestoreIncome(userID string, id string) error {
 	
 	if result.Error != nil{
 		logger.Error("Error restoring income: %v", result.Error)
-		return result.Error
+		return nil, result.Error
+	}
+	
+	// Get the updated income
+	updatedIncome, err := GetIncomeByID(userID, id)
+	if err != nil {
+		logger.Error("Error retrieving updated income: %v", err)
+		return nil, errors.New("error retrieving updated income")
 	}
 	
 	logger.Info("Income restored successfully: %s", id)
-	return nil
+	return updatedIncome, nil
 }
 
-func ChangeIncomeStatus(userID string, id string, newStatus models.Status, reason *string) error {
+func ChangeIncomeStatus(userID string, id string, newStatus models.Status, reason *string) (*models.Income, error) {
 	// Validar que el status es válido
 	if !models.ValidateStatus(newStatus) {
-		return errors.New("invalid status")
+		return nil, errors.New("invalid status")
 	}
 	
 	// Verificar que el income existe y pertenece al usuario
@@ -179,12 +186,17 @@ func ChangeIncomeStatus(userID string, id string, newStatus models.Status, reaso
 	result := db.DB.Where("user_id = ? AND id = ?", userID, id).First(&existingIncome)
 	if result.Error != nil {
 		logger.Error("Income not found: %v", result.Error)
-		return errors.New("income not found or access denied")
+		return nil, errors.New("income not found or access denied")
 	}
 	
-	// No hacer nada si ya tiene ese status
+	// No hacer nada si ya tiene ese status - return current income
 	if existingIncome.Status == newStatus {
-		return nil
+		updatedIncome, err := GetIncomeByID(userID, id)
+		if err != nil {
+			logger.Error("Error retrieving income: %v", err)
+			return nil, errors.New("error retrieving income")
+		}
+		return updatedIncome, nil
 	}
 	
 	// Actualizar status
@@ -197,11 +209,18 @@ func ChangeIncomeStatus(userID string, id string, newStatus models.Status, reaso
 	result = db.DB.Model(&existingIncome).Updates(updates)
 	if result.Error != nil{
 		logger.Error("Error changing income status: %v", result.Error)
-		return result.Error
+		return nil, result.Error
+	}
+	
+	// Get the updated income
+	updatedIncome, err := GetIncomeByID(userID, id)
+	if err != nil {
+		logger.Error("Error retrieving updated income: %v", err)
+		return nil, errors.New("error retrieving updated income")
 	}
 	
 	logger.Info("Income status changed to %s successfully: %s", newStatus, id)
-	return nil
+	return updatedIncome, nil
 }
 
 func HardDeleteIncome(userID string, id string) error {

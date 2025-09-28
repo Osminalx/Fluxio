@@ -489,7 +489,7 @@ func UpdateBudgetHandler(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Security bearerAuth
 // @Param id path string true "Budget ID"
-// @Success 204 "No Content"
+// @Success 200 {object} BudgetResponse
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 404 {string} string "Budget not found"
@@ -534,7 +534,7 @@ func DeleteBudgetHandler(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Security bearerAuth
 // @Param id path string true "Budget ID"
-// @Success 204 "No Content"
+// @Success 200 {object} BudgetResponse
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 404 {string} string "Budget not found or not deleted"
@@ -559,7 +559,8 @@ func RestoreBudgetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := services.RestoreBudget(userID, id); err != nil {
+	restoredBudget, err := services.RestoreBudget(userID, id)
+	if err != nil {
 		logger.Error("Error restoring budget: %v", err)
 		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "not deleted") || strings.Contains(err.Error(), "access denied") {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -571,7 +572,10 @@ func RestoreBudgetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	response := convertBudgetToResponse(restoredBudget)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // ChangeBudgetStatusHandler godoc
@@ -583,7 +587,7 @@ func RestoreBudgetHandler(w http.ResponseWriter, r *http.Request) {
 // @Security bearerAuth
 // @Param id path string true "Budget ID"
 // @Param request body ChangeStatusRequest true "New status"
-// @Success 204 "No Content"
+// @Success 200 {object} BudgetResponse
 // @Failure 400 {string} string "Invalid request body"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 404 {string} string "Budget not found"
@@ -623,7 +627,8 @@ func ChangeBudgetStatusHandler(w http.ResponseWriter, r *http.Request) {
 	// Convert string to Status
 	status := models.Status(req.Status)
 
-	if err := services.ChangeBudgetStatus(userID, id, status, req.Reason); err != nil {
+	updatedBudget, err := services.ChangeBudgetStatus(userID, id, status, req.Reason)
+	if err != nil {
 		logger.Error("Error changing budget status: %v", err)
 		if strings.Contains(err.Error(), "invalid status") {
 			http.Error(w, "Invalid status", http.StatusBadRequest)
@@ -637,7 +642,10 @@ func ChangeBudgetStatusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	response := convertBudgetToResponse(updatedBudget)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // Helper functions

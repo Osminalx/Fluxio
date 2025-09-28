@@ -398,7 +398,7 @@ func UpdateIncomeHandler(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Security bearerAuth
 // @Param id path string true "Income ID"
-// @Success 204 "No Content"
+// @Success 200 {object} IncomeResponse
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 404 {string} string "Income not found"
@@ -443,7 +443,7 @@ func DeleteIncomeHandler(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Security bearerAuth
 // @Param id path string true "Income ID"
-// @Success 204 "No Content"
+// @Success 200 {object} IncomeResponse
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 404 {string} string "Income not found or not deleted"
@@ -467,7 +467,8 @@ func RestoreIncomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := services.RestoreIncome(userID, id); err != nil {
+	restoredIncome, err := services.RestoreIncome(userID, id)
+	if err != nil {
 		logger.Error("Error restoring income: %v", err)
 		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "not deleted") || strings.Contains(err.Error(), "access denied") {
 			http.Error(w, "Income not found, not deleted, or access denied", http.StatusNotFound)
@@ -477,7 +478,10 @@ func RestoreIncomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	response := convertIncomeToResponse(restoredIncome)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // ChangeIncomeStatusHandler godoc
@@ -489,7 +493,7 @@ func RestoreIncomeHandler(w http.ResponseWriter, r *http.Request) {
 // @Security bearerAuth
 // @Param id path string true "Income ID"
 // @Param request body ChangeStatusRequest true "New status"
-// @Success 204 "No Content"
+// @Success 200 {object} IncomeResponse
 // @Failure 400 {string} string "Invalid request body"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 404 {string} string "Income not found"
@@ -528,7 +532,8 @@ func ChangeIncomeStatusHandler(w http.ResponseWriter, r *http.Request) {
 	// Convert string to Status
 	status := models.Status(req.Status)
 
-	if err := services.ChangeIncomeStatus(userID, id, status, req.Reason); err != nil {
+	updatedIncome, err := services.ChangeIncomeStatus(userID, id, status, req.Reason)
+	if err != nil {
 		logger.Error("Error changing income status: %v", err)
 		if strings.Contains(err.Error(), "invalid status") {
 			http.Error(w, "Invalid status", http.StatusBadRequest)
@@ -540,7 +545,10 @@ func ChangeIncomeStatusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	response := convertIncomeToResponse(updatedIncome)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // Helper functions

@@ -435,7 +435,7 @@ func UpdateUserCategory(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Security BearerAuth
 // @Param id path string true "Category ID"
-// @Success 204
+// @Success 200 {object} UserCategoryResponse
 // @Failure 400 {string} string "Category ID is required"
 // @Failure 404 {string} string "Category not found"
 // @Failure 409 {string} string "Category has active expenses"
@@ -475,7 +475,7 @@ func SoftDeleteUserCategory(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Security BearerAuth
 // @Param id path string true "Category ID"
-// @Success 204
+// @Success 200 {object} UserCategoryResponse
 // @Failure 400 {string} string "Invalid request or category can't be restored"
 // @Failure 404 {string} string "Category not found"
 // @Failure 409 {string} string "Category name conflict"
@@ -490,7 +490,7 @@ func RestoreUserCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := services.RestoreUserCategory(userID, id)
+	restoredCategory, err := services.RestoreUserCategory(userID, id)
 	if err != nil {
 		logger.Error("Error restoring user category: %v", err)
 		if err.Error() == "cannot restore: you already have a category with this name in this expense type" {
@@ -506,7 +506,10 @@ func RestoreUserCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	response := convertUserCategoryToResponse(restoredCategory)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // @Summary Create default user categories

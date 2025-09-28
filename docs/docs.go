@@ -168,6 +168,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/auth/me": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Devuelve la información del usuario autenticado basada en el token JWT",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Obtener información del usuario actual",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.UserProfileResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Token inválido o expirado",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Usuario no encontrado",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/auth/refresh": {
             "post": {
                 "description": "Generates a new access token using a valid refresh token",
@@ -647,7 +693,7 @@ const docTemplate = `{
                         "bearerAuth": []
                     }
                 ],
-                "description": "Restores a previously deleted bank account (soft delete)",
+                "description": "Restores a previously deleted, archived, or locked bank account to active status",
                 "consumes": [
                     "application/json"
                 ],
@@ -657,7 +703,7 @@ const docTemplate = `{
                 "tags": [
                     "bank_account"
                 ],
-                "summary": "Restore a deleted bank account",
+                "summary": "Restore a bank account to active status",
                 "parameters": [
                     {
                         "type": "string",
@@ -684,7 +730,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Bank account not found or not deleted",
+                        "description": "Bank account not found or not restorable",
                         "schema": {
                             "type": "string"
                         }
@@ -705,7 +751,7 @@ const docTemplate = `{
                         "bearerAuth": []
                     }
                 ],
-                "description": "Changes the status of a bank account (active, inactive, deleted, etc.)",
+                "description": "Changes the status of a bank account (active, inactive, deleted, etc.) and returns the updated account",
                 "consumes": [
                     "application/json"
                 ],
@@ -735,8 +781,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BankAccountFullResponse"
+                        }
                     },
                     "400": {
                         "description": "Invalid request body",
@@ -6659,6 +6708,31 @@ const docTemplate = `{
                 "total_categories": {
                     "type": "integer",
                     "example": 15
+                }
+            }
+        },
+        "api.UserProfileResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string",
+                    "example": "2023-01-01T00:00:00Z"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2023-12-01T00:00:00Z"
                 }
             }
         },

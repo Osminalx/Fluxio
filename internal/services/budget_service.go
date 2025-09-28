@@ -219,13 +219,13 @@ func SoftDeleteBudget(userID string, id string) error {
 }
 
 // RestoreBudget restores a deleted budget for the user
-func RestoreBudget(userID string, id string) error {
+func RestoreBudget(userID string, id string) (*models.Budget, error) {
 	// Verificar que el presupuesto existe, pertenece al usuario y está eliminado
 	var existingBudget models.Budget
 	result := db.DB.Where("user_id = ? AND id = ? AND status = ?", userID, id, models.StatusDeleted).First(&existingBudget)
 	if result.Error != nil {
 		logger.Error("Budget not found, not deleted, or access denied: %v", result.Error)
-		return errors.New("budget not found, not deleted, or access denied")
+		return nil, errors.New("budget not found, not deleted, or access denied")
 	}
 	
 	// Verificar que no existe otro presupuesto activo para ese mes/año
@@ -234,7 +234,7 @@ func RestoreBudget(userID string, id string) error {
 		userID, existingBudget.MonthYear, models.GetActiveStatuses(), id).First(&activeBudget)
 	if checkResult.Error == nil {
 		logger.Error("Another active budget exists for this month/year")
-		return errors.New("cannot restore: another active budget exists for this month/year")
+		return nil, errors.New("cannot restore: another active budget exists for this month/year")
 	}
 	
 	// Restaurar como activo
@@ -246,18 +246,25 @@ func RestoreBudget(userID string, id string) error {
 	
 	if result.Error != nil{
 		logger.Error("Error restoring budget: %v", result.Error)
-		return result.Error
+		return nil, result.Error
+	}
+	
+	// Get the updated budget
+	updatedBudget, err := GetBudgetByID(userID, id)
+	if err != nil {
+		logger.Error("Error retrieving updated budget: %v", err)
+		return nil, errors.New("error retrieving updated budget")
 	}
 	
 	logger.Info("Budget restored successfully: %s", id)
-	return nil
+	return updatedBudget, nil
 }
 
 // ChangeBudgetStatus changes the status of a budget
-func ChangeBudgetStatus(userID string, id string, newStatus models.Status, reason *string) error {
+func ChangeBudgetStatus(userID string, id string, newStatus models.Status, reason *string) (*models.Budget, error) {
 	// Validar que el status es válido
 	if !models.ValidateStatus(newStatus) {
-		return errors.New("invalid status")
+		return nil, errors.New("invalid status")
 	}
 	
 	// Verificar que el presupuesto existe y pertenece al usuario
@@ -265,12 +272,17 @@ func ChangeBudgetStatus(userID string, id string, newStatus models.Status, reaso
 	result := db.DB.Where("user_id = ? AND id = ?", userID, id).First(&existingBudget)
 	if result.Error != nil {
 		logger.Error("Budget not found: %v", result.Error)
-		return errors.New("budget not found or access denied")
+		return nil, errors.New("budget not found or access denied")
 	}
 	
-	// No hacer nada si ya tiene ese status
+	// No hacer nada si ya tiene ese status - return current budget
 	if existingBudget.Status == newStatus {
-		return nil
+		updatedBudget, err := GetBudgetByID(userID, id)
+		if err != nil {
+			logger.Error("Error retrieving budget: %v", err)
+			return nil, errors.New("error retrieving budget")
+		}
+		return updatedBudget, nil
 	}
 	
 	// Si se está activando, verificar que no haya otro activo para ese mes/año
@@ -280,7 +292,7 @@ func ChangeBudgetStatus(userID string, id string, newStatus models.Status, reaso
 			userID, existingBudget.MonthYear, models.GetActiveStatuses(), id).First(&activeBudget)
 		if checkResult.Error == nil {
 			logger.Error("Another active budget exists for this month/year")
-			return errors.New("cannot activate: another active budget exists for this month/year")
+			return nil, errors.New("cannot activate: another active budget exists for this month/year")
 		}
 	}
 	
@@ -294,11 +306,18 @@ func ChangeBudgetStatus(userID string, id string, newStatus models.Status, reaso
 	result = db.DB.Model(&existingBudget).Updates(updates)
 	if result.Error != nil{
 		logger.Error("Error changing budget status: %v", result.Error)
-		return result.Error
+		return nil, result.Error
+	}
+	
+	// Get the updated budget
+	updatedBudget, err := GetBudgetByID(userID, id)
+	if err != nil {
+		logger.Error("Error retrieving updated budget: %v", err)
+		return nil, errors.New("error retrieving updated budget")
 	}
 	
 	logger.Info("Budget status changed to %s successfully: %s", newStatus, id)
-	return nil
+	return updatedBudget, nil
 }
 
 // HardDeleteBudget permanently deletes a budget for the user

@@ -533,7 +533,7 @@ func UpdateExpenseHandler(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Security bearerAuth
 // @Param id path string true "Expense ID"
-// @Success 204 "No Content"
+// @Success 200 {object} ExpenseResponse
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 404 {string} string "Expense not found"
@@ -578,7 +578,7 @@ func DeleteExpenseHandler(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Security bearerAuth
 // @Param id path string true "Expense ID"
-// @Success 204 "No Content"
+// @Success 200 {object} ExpenseResponse
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 404 {string} string "Expense not found or not deleted"
@@ -602,7 +602,8 @@ func RestoreExpenseHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := services.RestoreExpense(userID, id); err != nil {
+	restoredExpense, err := services.RestoreExpense(userID, id)
+	if err != nil {
 		logger.Error("Error restoring expense: %v", err)
 		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "not deleted") || strings.Contains(err.Error(), "access denied") {
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -614,7 +615,10 @@ func RestoreExpenseHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	response := convertExpenseToResponse(restoredExpense)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // ChangeExpenseStatusHandler godoc
@@ -626,7 +630,7 @@ func RestoreExpenseHandler(w http.ResponseWriter, r *http.Request) {
 // @Security bearerAuth
 // @Param id path string true "Expense ID"
 // @Param request body ChangeStatusRequest true "New status"
-// @Success 204 "No Content"
+// @Success 200 {object} ExpenseResponse
 // @Failure 400 {string} string "Invalid request body"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 404 {string} string "Expense not found"
@@ -665,7 +669,8 @@ func ChangeExpenseStatusHandler(w http.ResponseWriter, r *http.Request) {
 	// Convert string to Status
 	status := models.Status(req.Status)
 
-	if err := services.ChangeExpenseStatus(userID, id, status, req.Reason); err != nil {
+	updatedExpense, err := services.ChangeExpenseStatus(userID, id, status, req.Reason)
+	if err != nil {
 		logger.Error("Error changing expense status: %v", err)
 		if strings.Contains(err.Error(), "invalid status") {
 			http.Error(w, "Invalid status", http.StatusBadRequest)
@@ -677,7 +682,10 @@ func ChangeExpenseStatusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	response := convertExpenseToResponse(updatedExpense)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // === ADDITIONAL ENDPOINTS FOR SPECIALIZED QUERIES ===

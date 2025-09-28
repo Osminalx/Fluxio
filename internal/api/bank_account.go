@@ -402,7 +402,7 @@ func UpdateBankAccountHandler(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Security bearerAuth
 // @Param id path string true "Bank Account ID"
-// @Success 204 "No Content"
+// @Success 200 {object} BankAccountResponse
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 404 {string} string "Bank account not found"
@@ -440,17 +440,17 @@ func DeleteBankAccountHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // RestoreBankAccountHandler godoc
-// @Summary Restore a deleted bank account
-// @Description Restores a previously deleted bank account (soft delete)
+// @Summary Restore a bank account to active status
+// @Description Restores a previously deleted, archived, or locked bank account to active status
 // @Tags bank_account
 // @Accept json
 // @Produce json
 // @Security bearerAuth
 // @Param id path string true "Bank Account ID"
-// @Success 204 "No Content"
+// @Success 200 {object} BankAccountResponse
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 401 {string} string "Unauthorized"
-// @Failure 404 {string} string "Bank account not found or not deleted"
+// @Failure 404 {string} string "Bank account not found or not restorable"
 // @Failure 500 {string} string "Internal server error"
 // @Router /api/v1/bank-accounts/{id}/restore [post]
 func RestoreBankAccountHandler(w http.ResponseWriter, r *http.Request) {
@@ -471,9 +471,10 @@ func RestoreBankAccountHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := services.RestoreBankAccount(userID, id); err != nil {
+	restoredAccount, err := services.RestoreBankAccount(userID, id)
+	if err != nil {
 		logger.Error("Error restoring bank account: %v", err)
-		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "not deleted") || strings.Contains(err.Error(), "access denied") {
+		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "not restorable") || strings.Contains(err.Error(), "access denied") {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, "Error restoring bank account", http.StatusInternalServerError)
@@ -481,19 +482,22 @@ func RestoreBankAccountHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	response := convertBankAccountToResponse(restoredAccount)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // ChangeBankAccountStatusHandler godoc
 // @Summary Change the status of a bank account
-// @Description Changes the status of a bank account (active, inactive, deleted, etc.)
+// @Description Changes the status of a bank account (active, inactive, deleted, etc.) and returns the updated account
 // @Tags bank_account
 // @Accept json
 // @Produce json
 // @Security bearerAuth
 // @Param id path string true "Bank Account ID"
 // @Param request body ChangeStatusRequest true "New status"
-// @Success 204 "No Content"
+// @Success 200 {object} BankAccountFullResponse
 // @Failure 400 {string} string "Invalid request body"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 404 {string} string "Bank account not found"
@@ -544,7 +548,20 @@ func ChangeBankAccountStatusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	// Get the updated bank account to return to the frontend
+	updatedBankAccount, err := services.GetBankAccountByID(userID, id)
+	if err != nil {
+		logger.Error("Error retrieving updated bank account: %v", err)
+		http.Error(w, "Error retrieving updated bank account", http.StatusInternalServerError)
+		return
+	}
+
+	response := convertBankAccountToResponse(updatedBankAccount)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
+
 
 
