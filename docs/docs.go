@@ -588,8 +588,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BankAccountResponse"
+                        }
                     },
                     "400": {
                         "description": "Invalid ID",
@@ -714,8 +717,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BankAccountResponse"
+                        }
                     },
                     "400": {
                         "description": "Invalid ID",
@@ -801,6 +807,282 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Bank account not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/budget-history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all budget history entries for the user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Get all budget history",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/budget-history/date-range": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get budget history entries within a specific date range",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Get budget history by date range",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Date parameters are required or invalid",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/budget-history/patterns": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Analyze patterns in budget changes for machine learning insights",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Analyze budget patterns",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of months to analyze",
+                        "name": "months",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryPatternsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid months parameter",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/budget-history/reasons": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get budget history entries filtered by change reason",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Get budget history with reasons filter",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Change reason filter",
+                        "name": "reason",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Reason filter is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/budget-history/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get statistical information about budget history",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Get budget history statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryStatsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/budget-history/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a specific budget history entry by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Get budget history by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Budget History ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Budget history ID is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Budget history not found",
                         "schema": {
                             "type": "string"
                         }
@@ -1064,6 +1346,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/budgets/{budget_id}/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all history entries for a specific budget",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Budget History"
+                ],
+                "summary": "Get budget history by budget ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Budget ID",
+                        "name": "budget_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Budget ID is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/budgets/{id}": {
             "get": {
                 "security": [
@@ -1151,8 +1482,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetResponse"
+                        }
                     },
                     "400": {
                         "description": "Invalid ID",
@@ -1277,8 +1611,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetResponse"
+                        }
                     },
                     "400": {
                         "description": "Invalid ID",
@@ -1350,8 +1687,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.BudgetResponse"
+                        }
                     },
                     "400": {
                         "description": "Invalid request body",
@@ -1976,8 +2316,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpenseResponse"
+                        }
                     },
                     "400": {
                         "description": "Invalid ID",
@@ -2102,8 +2445,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpenseResponse"
+                        }
                     },
                     "400": {
                         "description": "Invalid ID",
@@ -2169,8 +2515,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ExpenseResponse"
+                        }
                     },
                     "400": {
                         "description": "Invalid request body",
@@ -3247,8 +3596,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.IncomeResponse"
+                        }
                     },
                     "400": {
                         "description": "Invalid ID",
@@ -3373,8 +3725,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.IncomeResponse"
+                        }
                     },
                     "400": {
                         "description": "Invalid ID",
@@ -3440,8 +3795,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.IncomeResponse"
+                        }
                     },
                     "400": {
                         "description": "Invalid request body",
@@ -3950,6 +4308,98 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/setup/initialize": {
+            "post": {
+                "description": "Initialize the basic expense system with default expense types (Admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System Setup"
+                ],
+                "summary": "Initialize expense system",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/api.SuccessResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/setup/overview": {
+            "get": {
+                "description": "Get an overview of the expense system setup and configuration",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System Setup"
+                ],
+                "summary": "Get system overview",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.SystemOverviewResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/setup/user": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create default categories for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System Setup"
+                ],
+                "summary": "Setup new user",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/api.SuccessResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/transfers": {
             "get": {
                 "security": [
@@ -4402,592 +4852,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/budget-history": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get all budget history entries for the user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Get all budget history",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/budget-history/date-range": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get budget history entries within a specific date range",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Get budget history by date range",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Start date (YYYY-MM-DD)",
-                        "name": "start_date",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "End date (YYYY-MM-DD)",
-                        "name": "end_date",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Date parameters are required or invalid",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/budget-history/patterns": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Analyze patterns in budget changes for machine learning insights",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Analyze budget patterns",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Number of months to analyze",
-                        "name": "months",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryPatternsResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid months parameter",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/budget-history/reasons": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get budget history entries filtered by change reason",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Get budget history with reasons filter",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Change reason filter",
-                        "name": "reason",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Reason filter is required",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/budget-history/stats": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get statistical information about budget history",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Get budget history statistics",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryStatsResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/budget-history/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get a specific budget history entry by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Get budget history by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Budget History ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Budget history ID is required",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Budget history not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/budgets/{budget_id}/history": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get all history entries for a specific budget",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Get budget history by budget ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Budget ID",
-                        "name": "budget_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Budget ID is required",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/expense-types": {
-            "get": {
-                "description": "Get all active expense types (Needs, Wants, Savings)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Expense Types"
-                ],
-                "summary": "Get all expense types",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.ExpenseTypesListResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/expense-types/name/{name}": {
-            "get": {
-                "description": "Get a specific expense type by name (Needs, Wants, Savings)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Expense Types"
-                ],
-                "summary": "Get expense type by name",
-                "parameters": [
-                    {
-                        "enum": [
-                            "Needs",
-                            "Wants",
-                            "Savings"
-                        ],
-                        "type": "string",
-                        "description": "Expense Type Name",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.SimpleExpenseTypeResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Expense type name is required",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Expense type not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/expense-types/with-categories": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get all expense types with the authenticated user's categories loaded",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Expense Types"
-                ],
-                "summary": "Get expense types with user categories",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.ExpenseTypesListResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/expense-types/{id}": {
-            "get": {
-                "description": "Get a specific expense type by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Expense Types"
-                ],
-                "summary": "Get expense type by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Expense Type ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.SimpleExpenseTypeResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Expense type ID is required",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Expense type not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/setup/initialize": {
-            "post": {
-                "description": "Initialize the basic expense system with default expense types (Admin only)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "System Setup"
-                ],
-                "summary": "Initialize expense system",
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/api.SuccessResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/setup/overview": {
-            "get": {
-                "description": "Get an overview of the expense system setup and configuration",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "System Setup"
-                ],
-                "summary": "Get system overview",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.SystemOverviewResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/setup/user": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Create default categories for the authenticated user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "System Setup"
-                ],
-                "summary": "Setup new user",
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/api.SuccessResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/user-categories": {
+        "/api/v1/user-categories": {
             "get": {
                 "security": [
                     {
@@ -5084,7 +4949,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user-categories/defaults": {
+        "/api/v1/user-categories/defaults": {
             "post": {
                 "security": [
                     {
@@ -5118,7 +4983,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user-categories/expense-type-name/{expense_type_name}": {
+        "/api/v1/user-categories/expense-type-name/{expense_type_name}": {
             "get": {
                 "security": [
                     {
@@ -5172,7 +5037,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user-categories/expense-type/{expense_type_id}": {
+        "/api/v1/user-categories/expense-type/{expense_type}": {
             "get": {
                 "security": [
                     {
@@ -5193,8 +5058,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Expense Type ID",
-                        "name": "expense_type_id",
+                        "description": "Expense Type",
+                        "name": "expense_type",
                         "in": "path",
                         "required": true
                     },
@@ -5213,7 +5078,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Expense type ID is required",
+                        "description": "Expense type is required or invalid",
                         "schema": {
                             "type": "string"
                         }
@@ -5227,7 +5092,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user-categories/grouped": {
+        "/api/v1/user-categories/grouped": {
             "get": {
                 "security": [
                     {
@@ -5261,7 +5126,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user-categories/stats": {
+        "/api/v1/user-categories/stats": {
             "get": {
                 "security": [
                     {
@@ -5295,7 +5160,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user-categories/{id}": {
+        "/api/v1/user-categories/{id}": {
             "get": {
                 "security": [
                     {
@@ -5444,8 +5309,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.UserCategoryResponse"
+                        }
                     },
                     "400": {
                         "description": "Category ID is required",
@@ -5474,7 +5342,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/user-categories/{id}/restore": {
+        "/api/v1/user-categories/{id}/restore": {
             "post": {
                 "security": [
                     {
@@ -5502,8 +5370,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.UserCategoryResponse"
+                        }
                     },
                     "400": {
                         "description": "Invalid request or category can't be restored",
@@ -5999,9 +5870,14 @@ const docTemplate = `{
         "api.CreateUserCategoryRequest": {
             "type": "object",
             "properties": {
-                "expense_type_id": {
+                "expense_type": {
                     "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                    "enum": [
+                        "needs",
+                        "wants",
+                        "savings"
+                    ],
+                    "example": "needs"
                 },
                 "name": {
                     "type": "string",
@@ -6102,31 +5978,34 @@ const docTemplate = `{
                 }
             }
         },
-        "api.ExpenseTypeResponse": {
+        "api.ExpenseTypeInfo": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
                 "name": {
                     "type": "string",
                     "example": "Needs"
+                },
+                "value": {
+                    "type": "string",
+                    "example": "needs"
                 }
             }
         },
-        "api.ExpenseTypesListResponse": {
+        "api.ExpenseTypeResponse": {
             "type": "object",
             "properties": {
-                "count": {
-                    "type": "integer",
-                    "example": 3
+                "name": {
+                    "type": "string",
+                    "example": "Needs"
                 },
-                "expense_types": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/api.SimpleExpenseTypeResponse"
-                    }
+                "value": {
+                    "type": "string",
+                    "enum": [
+                        "needs",
+                        "wants",
+                        "savings"
+                    ],
+                    "example": "needs"
                 }
             }
         },
@@ -6386,37 +6265,6 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SimpleExpenseTypeResponse": {
-            "type": "object",
-            "properties": {
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/api.UserCategoryResponse"
-                    }
-                },
-                "created_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Needs"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "active"
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                }
-            }
-        },
         "api.SuccessResponse": {
             "type": "object",
             "properties": {
@@ -6431,7 +6279,7 @@ const docTemplate = `{
                 "expense_types": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api.SimpleExpenseTypeResponse"
+                        "$ref": "#/definitions/api.ExpenseTypeInfo"
                     }
                 },
                 "expense_types_count": {
@@ -6587,9 +6435,14 @@ const docTemplate = `{
         "api.UpdateUserCategoryRequest": {
             "type": "object",
             "properties": {
-                "expense_type_id": {
+                "expense_type": {
                     "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                    "enum": [
+                        "needs",
+                        "wants",
+                        "savings"
+                    ],
+                    "example": "needs"
                 },
                 "name": {
                     "type": "string",
@@ -6630,31 +6483,6 @@ const docTemplate = `{
                 }
             }
         },
-        "api.UserCategoryExpenseType": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Needs"
-                },
-                "status": {
-                    "type": "string",
-                    "example": "active"
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                }
-            }
-        },
         "api.UserCategoryResponse": {
             "type": "object",
             "properties": {
@@ -6663,11 +6491,17 @@ const docTemplate = `{
                     "example": "2024-01-15T10:30:00Z"
                 },
                 "expense_type": {
-                    "$ref": "#/definitions/api.UserCategoryExpenseType"
-                },
-                "expense_type_id": {
                     "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                    "enum": [
+                        "needs",
+                        "wants",
+                        "savings"
+                    ],
+                    "example": "needs"
+                },
+                "expense_type_name": {
+                    "type": "string",
+                    "example": "Needs"
                 },
                 "id": {
                     "type": "string",

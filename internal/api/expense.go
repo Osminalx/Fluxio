@@ -53,8 +53,8 @@ type CategoryResponse struct {
 }
 
 type ExpenseTypeResponse struct {
-	ID   string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Name string `json:"name" example:"Needs"`
+	Value string `json:"value" example:"needs" enums:"needs,wants,savings"`
+	Name  string `json:"name" example:"Needs"`
 }
 
 
@@ -117,10 +117,10 @@ func convertExpenseToResponse(expense *models.Expense) ExpenseResponse {
 		}
 		
 		// Include expense type if loaded
-		if expense.Category.ExpenseType.ID != (uuid.UUID{}) {
+		if expense.Category.ExpenseType != (models.ExpenseType("")) {
 			categoryResp.ExpenseType = &ExpenseTypeResponse{
-				ID:   expense.Category.ExpenseType.ID.String(),
-				Name: expense.Category.ExpenseType.Name,
+				Value: string(expense.Category.ExpenseType),
+				Name:  models.GetExpenseTypeName(expense.Category.ExpenseType),
 			}
 		}
 		

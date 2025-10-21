@@ -74,9 +74,9 @@ func convertBudgetHistoryToResponse(history *models.BudgetHistory) BudgetHistory
 // @Failure 400 {string} string "Budget history ID is required"
 // @Failure 404 {string} string "Budget history not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /budget-history/{id} [get]
+// @Router /api/v1/budget-history/{id} [get]
 func GetBudgetHistoryByID(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 	id := r.PathValue("id")
 
 	if id == "" {
@@ -107,9 +107,9 @@ func GetBudgetHistoryByID(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} BudgetHistoryListResponse
 // @Failure 400 {string} string "Budget ID is required"
 // @Failure 500 {string} string "Internal server error"
-// @Router /budgets/{budget_id}/history [get]
+// @Router /api/v1/budgets/{budget_id}/history [get]
 func GetBudgetHistoryByBudgetID(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 	budgetID := r.PathValue("budget_id")
 
 	if budgetID == "" {
@@ -147,9 +147,9 @@ func GetBudgetHistoryByBudgetID(w http.ResponseWriter, r *http.Request) {
 // @Security BearerAuth
 // @Success 200 {object} BudgetHistoryListResponse
 // @Failure 500 {string} string "Internal server error"
-// @Router /budget-history [get]
+// @Router /api/v1/budget-history [get]
 func GetAllBudgetHistory(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	histories, err := services.GetAllBudgetHistory(userID)
 	if err != nil {
@@ -184,9 +184,9 @@ func GetAllBudgetHistory(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} BudgetHistoryListResponse
 // @Failure 400 {string} string "Date parameters are required or invalid"
 // @Failure 500 {string} string "Internal server error"
-// @Router /budget-history/date-range [get]
+// @Router /api/v1/budget-history/date-range [get]
 func GetBudgetHistoryByDateRange(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 	
 	startDateStr := r.URL.Query().Get("start_date")
 	endDateStr := r.URL.Query().Get("end_date")
@@ -243,9 +243,9 @@ func GetBudgetHistoryByDateRange(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} BudgetHistoryListResponse
 // @Failure 400 {string} string "Reason filter is required"
 // @Failure 500 {string} string "Internal server error"
-// @Router /budget-history/reasons [get]
+// @Router /api/v1/budget-history/reasons [get]
 func GetBudgetHistoryWithReasons(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 	reasonFilter := r.URL.Query().Get("reason")
 
 	if reasonFilter == "" {
@@ -283,9 +283,9 @@ func GetBudgetHistoryWithReasons(w http.ResponseWriter, r *http.Request) {
 // @Security BearerAuth
 // @Success 200 {object} BudgetHistoryStatsResponse
 // @Failure 500 {string} string "Internal server error"
-// @Router /budget-history/stats [get]
+// @Router /api/v1/budget-history/stats [get]
 func GetBudgetHistoryStats(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	stats, err := services.GetBudgetHistoryStats(userID)
 	if err != nil {
@@ -324,9 +324,9 @@ func GetBudgetHistoryStats(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} BudgetHistoryPatternsResponse
 // @Failure 400 {string} string "Invalid months parameter"
 // @Failure 500 {string} string "Internal server error"
-// @Router /budget-history/patterns [get]
+// @Router /api/v1/budget-history/patterns [get]
 func AnalyzeBudgetPatterns(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 	
 	monthsStr := r.URL.Query().Get("months")
 	months := 12 // Default to 12 months

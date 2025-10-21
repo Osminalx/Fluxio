@@ -7,37 +7,28 @@ import (
 	"github.com/Osminalx/fluxio/internal/models"
 	"github.com/Osminalx/fluxio/internal/services"
 	"github.com/Osminalx/fluxio/pkg/utils/logger"
-	"github.com/google/uuid"
 )
 
 // Request and response structures
 type CreateUserCategoryRequest struct {
-	Name          string `json:"name" example:"Groceries"`
-	ExpenseTypeID string `json:"expense_type_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Name        string `json:"name" example:"Groceries"`
+	ExpenseType string `json:"expense_type" example:"needs" enums:"needs,wants,savings"`
 }
 
 type UpdateUserCategoryRequest struct {
-	Name          *string `json:"name,omitempty" example:"Groceries Updated"`
-	ExpenseTypeID *string `json:"expense_type_id,omitempty" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Name        *string `json:"name,omitempty" example:"Groceries Updated"`
+	ExpenseType *string `json:"expense_type,omitempty" example:"needs" enums:"needs,wants,savings"`
 }
 
 type UserCategoryResponse struct {
-	ID              string                     `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Name            string                     `json:"name" example:"Groceries"`
-	ExpenseTypeID   string                     `json:"expense_type_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	ExpenseType     *UserCategoryExpenseType   `json:"expense_type,omitempty"`
-	Status          string                     `json:"status" example:"active"`
-	StatusChangedAt *string                    `json:"status_changed_at,omitempty" example:"2024-01-15T10:30:00Z"`
-	CreatedAt       string                     `json:"created_at" example:"2024-01-15T10:30:00Z"`
-	UpdatedAt       string                     `json:"updated_at" example:"2024-01-15T10:30:00Z"`
-}
-
-type UserCategoryExpenseType struct {
-	ID        string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Name      string `json:"name" example:"Needs"`
-	Status    string `json:"status" example:"active"`
-	CreatedAt string `json:"created_at" example:"2024-01-15T10:30:00Z"`
-	UpdatedAt string `json:"updated_at" example:"2024-01-15T10:30:00Z"`
+	ID              string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Name            string  `json:"name" example:"Groceries"`
+	ExpenseType     string  `json:"expense_type" example:"needs" enums:"needs,wants,savings"`
+	ExpenseTypeName string  `json:"expense_type_name" example:"Needs"`
+	Status          string  `json:"status" example:"active"`
+	StatusChangedAt *string `json:"status_changed_at,omitempty" example:"2024-01-15T10:30:00Z"`
+	CreatedAt       string  `json:"created_at" example:"2024-01-15T10:30:00Z"`
+	UpdatedAt       string  `json:"updated_at" example:"2024-01-15T10:30:00Z"`
 }
 
 type UserCategoriesListResponse struct {
@@ -61,36 +52,21 @@ type SuccessResponse struct {
 }
 
 // Helper functions to convert models to responses
-func convertExpenseTypeToUserCategoryResponse(expenseType *models.ExpenseType) *UserCategoryExpenseType {
-	if expenseType == nil {
-		return nil
-	}
-	
-	return &UserCategoryExpenseType{
-		ID:        expenseType.ID.String(),
-		Name:      expenseType.Name,
-		Status:    string(expenseType.Status),
-		CreatedAt: expenseType.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt: expenseType.UpdatedAt.Format("2006-01-02T15:04:05Z"),
-	}
-}
-
 func convertUserCategoryToResponse(category *models.Category) UserCategoryResponse {
 	response := UserCategoryResponse{
-		ID:            category.ID.String(),
-		Name:          category.Name,
-		ExpenseTypeID: category.ExpenseTypeID.String(),
-		Status:        string(category.Status),
-		CreatedAt:     category.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt:     category.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		ID:              category.ID.String(),
+		Name:            category.Name,
+		ExpenseType:     string(category.ExpenseType),
+		ExpenseTypeName: models.GetExpenseTypeName(category.ExpenseType),
+		Status:          string(category.Status),
+		CreatedAt:       category.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:       category.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 
 	if category.StatusChangedAt != nil {
 		statusChangedAt := category.StatusChangedAt.Format("2006-01-02T15:04:05Z")
 		response.StatusChangedAt = &statusChangedAt
 	}
-
-	response.ExpenseType = convertExpenseTypeToUserCategoryResponse(&category.ExpenseType)
 
 	return response
 }
@@ -106,9 +82,9 @@ func convertUserCategoryToResponse(category *models.Category) UserCategoryRespon
 // @Failure 400 {string} string "Invalid request body or missing required fields"
 // @Failure 409 {string} string "Category already exists"
 // @Failure 500 {string} string "Internal server error"
-// @Router /user-categories [post]
+// @Router /api/v1/user-categories [post]
 func CreateUserCategory(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	var req CreateUserCategoryRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -121,14 +97,20 @@ func CreateUserCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.ExpenseTypeID == "" {
-		http.Error(w, "Expense type ID is required", http.StatusBadRequest)
+	if req.ExpenseType == "" {
+		http.Error(w, "Expense type is required", http.StatusBadRequest)
+		return
+	}
+
+	// Validate expense type
+	if !models.IsValidExpenseType(req.ExpenseType) {
+		http.Error(w, "Invalid expense type. Must be one of: needs, wants, savings", http.StatusBadRequest)
 		return
 	}
 
 	category := &models.Category{
-		Name:          req.Name,
-		ExpenseTypeID: uuid.MustParse(req.ExpenseTypeID),
+		Name:        req.Name,
+		ExpenseType: models.ExpenseType(req.ExpenseType),
 	}
 
 	if err := services.CreateUserCategory(userID, category); err != nil {
@@ -137,7 +119,7 @@ func CreateUserCategory(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusConflict)
 			return
 		}
-		if err.Error() == "expense type not found or not active" {
+		if err.Error() == "invalid expense type. Must be one of: needs, wants, savings" {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -170,9 +152,9 @@ func CreateUserCategory(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {string} string "Category ID is required"
 // @Failure 404 {string} string "Category not found"
 // @Failure 500 {string} string "Internal server error"
-// @Router /user-categories/{id} [get]
+// @Router /api/v1/user-categories/{id} [get]
 func GetUserCategoryByID(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 	id := r.PathValue("id")
 
 	if id == "" {
@@ -202,9 +184,9 @@ func GetUserCategoryByID(w http.ResponseWriter, r *http.Request) {
 // @Param include_deleted query bool false "Include deleted categories" default:false
 // @Success 200 {object} UserCategoriesListResponse
 // @Failure 500 {string} string "Internal server error"
-// @Router /user-categories [get]
+// @Router /api/v1/user-categories [get]
 func GetUserCategories(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 	includeDeleted := r.URL.Query().Get("include_deleted") == "true"
 
 	categories, err := services.GetUserCategories(userID, includeDeleted)
@@ -235,23 +217,29 @@ func GetUserCategories(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param expense_type_id path string true "Expense Type ID"
+// @Param expense_type path string true "Expense Type" enums:"needs,wants,savings"
 // @Param include_deleted query bool false "Include deleted categories" default:false
 // @Success 200 {object} UserCategoriesListResponse
-// @Failure 400 {string} string "Expense type ID is required"
+// @Failure 400 {string} string "Expense type is required or invalid"
 // @Failure 500 {string} string "Internal server error"
-// @Router /user-categories/expense-type/{expense_type_id} [get]
+// @Router /api/v1/user-categories/expense-type/{expense_type} [get]
 func GetUserCategoriesByExpenseType(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
-	expenseTypeID := r.PathValue("expense_type_id")
+	userID := r.Context().Value("userID").(string)
+	expenseType := r.PathValue("expense_type")
 	includeDeleted := r.URL.Query().Get("include_deleted") == "true"
 
-	if expenseTypeID == "" {
-		http.Error(w, "Expense type ID is required", http.StatusBadRequest)
+	if expenseType == "" {
+		http.Error(w, "Expense type is required", http.StatusBadRequest)
 		return
 	}
 
-	categories, err := services.GetUserCategoriesByExpenseType(userID, expenseTypeID, includeDeleted)
+	// Validate expense type
+	if !models.IsValidExpenseType(expenseType) {
+		http.Error(w, "Invalid expense type. Must be one of: needs, wants, savings", http.StatusBadRequest)
+		return
+	}
+
+	categories, err := services.GetUserCategoriesByExpenseType(userID, expenseType, includeDeleted)
 	if err != nil {
 		logger.Error("Error getting user categories by expense type: %v", err)
 		http.Error(w, "Error retrieving categories", http.StatusInternalServerError)
@@ -283,9 +271,9 @@ func GetUserCategoriesByExpenseType(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} UserCategoriesListResponse
 // @Failure 400 {string} string "Expense type name is required"
 // @Failure 500 {string} string "Internal server error"
-// @Router /user-categories/expense-type-name/{expense_type_name} [get]
+// @Router /api/v1/user-categories/expense-type-name/{expense_type_name} [get]
 func GetUserCategoriesByExpenseTypeName(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 	expenseTypeName := r.PathValue("expense_type_name")
 
 	if expenseTypeName == "" {
@@ -323,9 +311,9 @@ func GetUserCategoriesByExpenseTypeName(w http.ResponseWriter, r *http.Request) 
 // @Security BearerAuth
 // @Success 200 {object} UserCategoriesGroupedResponse
 // @Failure 500 {string} string "Internal server error"
-// @Router /user-categories/grouped [get]
+// @Router /api/v1/user-categories/grouped [get]
 func GetUserCategoriesGroupedByType(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	groupedCategories, err := services.GetUserCategoriesGroupedByType(userID)
 	if err != nil {
@@ -369,9 +357,9 @@ func GetUserCategoriesGroupedByType(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {string} string "Category not found"
 // @Failure 409 {string} string "Category name already exists"
 // @Failure 500 {string} string "Internal server error"
-// @Router /user-categories/{id} [put]
+// @Router /api/v1/user-categories/{id} [put]
 func UpdateUserCategory(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 	id := r.PathValue("id")
 
 	if id == "" {
@@ -395,16 +383,21 @@ func UpdateUserCategory(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare updated category
 	updatedCategory := &models.Category{
-		Name:          existingCategory.Name,
-		ExpenseTypeID: existingCategory.ExpenseTypeID,
+		Name:        existingCategory.Name,
+		ExpenseType: existingCategory.ExpenseType,
 	}
 
 	if req.Name != nil {
 		updatedCategory.Name = *req.Name
 	}
 
-	if req.ExpenseTypeID != nil {
-		updatedCategory.ExpenseTypeID = uuid.MustParse(*req.ExpenseTypeID)
+	if req.ExpenseType != nil {
+		// Validate expense type
+		if !models.IsValidExpenseType(*req.ExpenseType) {
+			http.Error(w, "Invalid expense type. Must be one of: needs, wants, savings", http.StatusBadRequest)
+			return
+		}
+		updatedCategory.ExpenseType = models.ExpenseType(*req.ExpenseType)
 	}
 
 	updatedCategoryResult, err := services.UpdateUserCategory(userID, id, updatedCategory)
@@ -414,7 +407,7 @@ func UpdateUserCategory(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusConflict)
 			return
 		}
-		if err.Error() == "expense type not found or not active" {
+		if err.Error() == "invalid expense type. Must be one of: needs, wants, savings" {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -440,9 +433,9 @@ func UpdateUserCategory(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {string} string "Category not found"
 // @Failure 409 {string} string "Category has active expenses"
 // @Failure 500 {string} string "Internal server error"
-// @Router /user-categories/{id} [delete]
+// @Router /api/v1/user-categories/{id} [delete]
 func SoftDeleteUserCategory(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 	id := r.PathValue("id")
 
 	if id == "" {
@@ -480,9 +473,9 @@ func SoftDeleteUserCategory(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {string} string "Category not found"
 // @Failure 409 {string} string "Category name conflict"
 // @Failure 500 {string} string "Internal server error"
-// @Router /user-categories/{id}/restore [post]
+// @Router /api/v1/user-categories/{id}/restore [post]
 func RestoreUserCategory(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 	id := r.PathValue("id")
 
 	if id == "" {
@@ -498,7 +491,7 @@ func RestoreUserCategory(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err.Error() == "category not found, not deleted, or access denied" ||
-		   err.Error() == "cannot restore category: expense type is not active" {
+		   err.Error() == "cannot restore category: expense type is not valid" {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -520,9 +513,9 @@ func RestoreUserCategory(w http.ResponseWriter, r *http.Request) {
 // @Security BearerAuth
 // @Success 201 {object} SuccessResponse
 // @Failure 500 {string} string "Internal server error"
-// @Router /user-categories/defaults [post]
+// @Router /api/v1/user-categories/defaults [post]
 func CreateDefaultUserCategories(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	err := services.CreateDefaultUserCategories(userID)
 	if err != nil {
@@ -547,9 +540,9 @@ func CreateDefaultUserCategories(w http.ResponseWriter, r *http.Request) {
 // @Security BearerAuth
 // @Success 200 {object} UserCategoryStatsResponse
 // @Failure 500 {string} string "Internal server error"
-// @Router /user-categories/stats [get]
+// @Router /api/v1/user-categories/stats [get]
 func GetUserCategoryStats(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	stats, err := services.GetUserCategoryStats(userID)
 	if err != nil {

@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/Osminalx/fluxio/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -30,8 +29,8 @@ func Connect() {
 		log.Fatal("Error creating pgcrypto extension:", err)
 	}
 
-	// Auto migrate all models
-	err = DB.AutoMigrate(models.GetAllModels()...)
+	// Run all migrations (auto-migrate + custom migrations)
+	err = RunAllMigrations(DB)
 	if err != nil {
 		log.Fatal("Error migrating database:", err)
 	}

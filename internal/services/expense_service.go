@@ -53,7 +53,7 @@ func CreateExpense(userID string, expense *models.Expense) error {
 func GetExpenseByID(userID string, id string) (*models.Expense, error) {
 	var expense models.Expense
 	result := db.DB.Where("user_id = ? AND id = ? AND status IN ?", userID, id, models.GetVisibleStatuses()).
-		Preload("Category").Preload("Category.ExpenseType").Preload("BankAccount").First(&expense)
+		Preload("Category").Preload("BankAccount").First(&expense)
 	if result.Error != nil {
 		logger.Error("Error getting expense by id: %v", result.Error)
 		return nil, result.Error
@@ -67,7 +67,7 @@ func GetExpenseByID(userID string, id string) (*models.Expense, error) {
 func GetAllExpenses(userID string, includeDeleted bool) ([]models.Expense, error) {
 	var expenses []models.Expense
 	query := db.DB.Where("user_id = ?", userID).
-		Preload("Category").Preload("Category.ExpenseType").Preload("BankAccount")
+		Preload("Category").Preload("BankAccount")
 	
 	if !includeDeleted {
 		query = query.Where("status IN ?", models.GetVisibleStatuses())
@@ -87,7 +87,7 @@ func GetAllExpenses(userID string, includeDeleted bool) ([]models.Expense, error
 func GetActiveExpenses(userID string) ([]models.Expense, error) {
 	var expenses []models.Expense
 	result := db.DB.Where("user_id = ? AND status IN ?", userID, models.GetActiveStatuses()).
-		Preload("Category").Preload("Category.ExpenseType").Preload("BankAccount").
+		Preload("Category").Preload("BankAccount").
 		Order("date DESC, created_at DESC").Find(&expenses)
 	if result.Error != nil {
 		logger.Error("Error getting active expenses: %v", result.Error)
@@ -102,7 +102,7 @@ func GetActiveExpenses(userID string) ([]models.Expense, error) {
 func GetDeletedExpenses(userID string) ([]models.Expense, error) {
 	var expenses []models.Expense
 	result := db.DB.Where("user_id = ? AND status = ?", userID, models.StatusDeleted).
-		Preload("Category").Preload("Category.ExpenseType").Preload("BankAccount").
+		Preload("Category").Preload("BankAccount").
 		Order("status_changed_at DESC").Find(&expenses)
 	if result.Error != nil {
 		logger.Error("Error getting deleted expenses: %v", result.Error)
@@ -117,7 +117,7 @@ func GetDeletedExpenses(userID string) ([]models.Expense, error) {
 func GetExpensesByDateRange(userID string, startDate, endDate time.Time, includeDeleted bool) ([]models.Expense, error) {
 	var expenses []models.Expense
 	query := db.DB.Where("user_id = ? AND date BETWEEN ? AND ?", userID, startDate, endDate).
-		Preload("Category").Preload("Category.ExpenseType").Preload("BankAccount")
+		Preload("Category").Preload("BankAccount")
 	
 	if !includeDeleted {
 		query = query.Where("status IN ?", models.GetVisibleStatuses())
@@ -137,7 +137,7 @@ func GetExpensesByDateRange(userID string, startDate, endDate time.Time, include
 func GetExpensesByCategory(userID string, categoryID string, includeDeleted bool) ([]models.Expense, error) {
 	var expenses []models.Expense
 	query := db.DB.Where("user_id = ? AND category_id = ?", userID, categoryID).
-		Preload("Category").Preload("Category.ExpenseType").Preload("BankAccount")
+		Preload("Category").Preload("BankAccount")
 	
 	if !includeDeleted {
 		query = query.Where("status IN ?", models.GetVisibleStatuses())
@@ -157,7 +157,7 @@ func GetExpensesByCategory(userID string, categoryID string, includeDeleted bool
 func GetExpensesByBankAccount(userID string, bankAccountID string, includeDeleted bool) ([]models.Expense, error) {
 	var expenses []models.Expense
 	query := db.DB.Where("user_id = ? AND bank_account_id = ?", userID, bankAccountID).
-		Preload("Category").Preload("Category.ExpenseType").Preload("BankAccount")
+		Preload("Category").Preload("BankAccount")
 	
 	if !includeDeleted {
 		query = query.Where("status IN ?", models.GetVisibleStatuses())
@@ -238,7 +238,7 @@ func PatchExpense(userID string, id string, expense *models.Expense) (*models.Ex
 	
 	// Obtener el gasto actualizado con relaciones
 	result = db.DB.Where("user_id = ? AND id = ?", userID, id).
-		Preload("Category").Preload("Category.ExpenseType").Preload("BankAccount").First(&existingExpense)
+		Preload("Category").Preload("BankAccount").First(&existingExpense)
 	if result.Error != nil {
 		logger.Error("Error retrieving updated expense: %v", result.Error)
 		return nil, result.Error
@@ -422,7 +422,7 @@ func GetExpensesSummaryByPeriod(userID string, startDate, endDate time.Time) (ma
 	if totalCount > 0 {
 		summary["average_amount"] = totalAmount / float64(totalCount)
 	} else {
-		summary["average_amount"] = 0
+		summary["average_amount"] = 0.0
 	}
 	
 	// Gastos por ExpenseType (50/30/20)
@@ -433,12 +433,18 @@ func GetExpensesSummaryByPeriod(userID string, startDate, endDate time.Time) (ma
 	}
 	
 	result = db.DB.Table("expenses e").
-		Select("et.name as expense_type_name, COALESCE(SUM(e.amount), 0) as total_amount, COUNT(e.id) as count").
+		Select(`CASE 
+			WHEN c.expense_type = 'needs' THEN 'Needs'
+			WHEN c.expense_type = 'wants' THEN 'Wants'
+			WHEN c.expense_type = 'savings' THEN 'Savings'
+			ELSE c.expense_type
+		END as expense_type_name, 
+		COALESCE(SUM(e.amount), 0) as total_amount, 
+		COUNT(e.id) as count`).
 		Joins("JOIN categories c ON e.category_id = c.id").
-		Joins("JOIN expense_types et ON c.expense_type_id = et.id").
 		Where("e.user_id = ? AND e.date BETWEEN ? AND ? AND e.status IN ?", 
 			userID, startDate, endDate, models.GetActiveStatuses()).
-		Group("et.id, et.name").
+		Group("c.expense_type").
 		Order("total_amount DESC").
 		Scan(&expensesByType)
 	
@@ -457,12 +463,19 @@ func GetExpensesSummaryByPeriod(userID string, startDate, endDate time.Time) (ma
 	}
 	
 	result = db.DB.Table("expenses e").
-		Select("c.name as category_name, et.name as expense_type_name, COALESCE(SUM(e.amount), 0) as total_amount, COUNT(e.id) as count").
+		Select(`c.name as category_name, 
+		CASE 
+			WHEN c.expense_type = 'needs' THEN 'Needs'
+			WHEN c.expense_type = 'wants' THEN 'Wants'
+			WHEN c.expense_type = 'savings' THEN 'Savings'
+			ELSE c.expense_type
+		END as expense_type_name, 
+		COALESCE(SUM(e.amount), 0) as total_amount, 
+		COUNT(e.id) as count`).
 		Joins("JOIN categories c ON e.category_id = c.id").
-		Joins("JOIN expense_types et ON c.expense_type_id = et.id").
 		Where("e.user_id = ? AND e.date BETWEEN ? AND ? AND e.status IN ?", 
 			userID, startDate, endDate, models.GetActiveStatuses()).
-		Group("c.id, c.name, et.name").
+		Group("c.id, c.name, c.expense_type").
 		Order("total_amount DESC").
 		Limit(10).
 		Scan(&expensesByCategory)
@@ -493,12 +506,17 @@ func GetExpensesByExpenseType(userID string, startDate, endDate time.Time) (map[
 	}
 	
 	result := db.DB.Table("expenses e").
-		Select("et.name as expense_type_name, COALESCE(SUM(e.amount), 0) as total_amount").
+		Select(`CASE 
+			WHEN c.expense_type = 'needs' THEN 'Needs'
+			WHEN c.expense_type = 'wants' THEN 'Wants'
+			WHEN c.expense_type = 'savings' THEN 'Savings'
+			ELSE c.expense_type
+		END as expense_type_name, 
+		COALESCE(SUM(e.amount), 0) as total_amount`).
 		Joins("JOIN categories c ON e.category_id = c.id").
-		Joins("JOIN expense_types et ON c.expense_type_id = et.id").
 		Where("e.user_id = ? AND e.date BETWEEN ? AND ? AND e.status IN ?", 
 			userID, startDate, endDate, models.GetActiveStatuses()).
-		Group("et.id, et.name").
+		Group("c.expense_type").
 		Scan(&results)
 	
 	if result.Error != nil {
@@ -619,12 +637,18 @@ func GetSpendingTrends(userID string, months int) (map[string]interface{}, error
 	}
 	
 	result = db.DB.Table("expenses e").
-		Select("TO_CHAR(e.date, 'YYYY-MM') as month, et.name as expense_type_name, COALESCE(SUM(e.amount), 0) as total_amount").
+		Select(`TO_CHAR(e.date, 'YYYY-MM') as month, 
+		CASE 
+			WHEN c.expense_type = 'needs' THEN 'Needs'
+			WHEN c.expense_type = 'wants' THEN 'Wants'
+			WHEN c.expense_type = 'savings' THEN 'Savings'
+			ELSE c.expense_type
+		END as expense_type_name, 
+		COALESCE(SUM(e.amount), 0) as total_amount`).
 		Joins("JOIN categories c ON e.category_id = c.id").
-		Joins("JOIN expense_types et ON c.expense_type_id = et.id").
 		Where("e.user_id = ? AND e.date >= ? AND e.status IN ?", 
 			userID, startDate, models.GetActiveStatuses()).
-		Group("TO_CHAR(e.date, 'YYYY-MM'), et.id, et.name").
+		Group("TO_CHAR(e.date, 'YYYY-MM'), c.expense_type").
 		Order("month ASC, expense_type_name").
 		Scan(&typesTrends)
 	
@@ -661,7 +685,7 @@ func GetExpenseAnalyticsForML(userID string, months int) (map[string]interface{}
 			"day_of_week":       int(expense.Date.Weekday()),
 			"month":             int(expense.Date.Month()),
 			"category_name":     expense.Category.Name,
-			"expense_type_name": expense.Category.ExpenseType.Name,
+			"expense_type_name": models.GetExpenseTypeName(expense.Category.ExpenseType),
 			"description":       expense.Description,
 		})
 	}

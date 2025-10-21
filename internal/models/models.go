@@ -5,7 +5,7 @@ func GetAllModels() []interface{} {
 	return []interface{}{
 		&User{},
 		&BankAccount{},
-		&ExpenseType{},
+		// ExpenseType is now an enum (needs/wants/savings) - no longer a DB table
 		&Category{},
 		&FixedExpense{},
 		&Goal{},

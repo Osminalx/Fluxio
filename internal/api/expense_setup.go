@@ -9,10 +9,15 @@ import (
 )
 
 // Response structures
+type ExpenseTypeInfo struct {
+	Value string `json:"value" example:"needs"`
+	Name  string `json:"name" example:"Needs"`
+}
+
 type SystemOverviewResponse struct {
-	ExpenseTypesCount int                         `json:"expense_types_count" example:"3"`
-	ExpenseTypes      []SimpleExpenseTypeResponse `json:"expense_types"`
-	SystemInfo        map[string]interface{}      `json:"system_info"`
+	ExpenseTypesCount int                    `json:"expense_types_count" example:"3"`
+	ExpenseTypes      []ExpenseTypeInfo      `json:"expense_types"`
+	SystemInfo        map[string]interface{} `json:"system_info"`
 }
 
 // @Summary Initialize expense system
@@ -22,7 +27,7 @@ type SystemOverviewResponse struct {
 // @Produce json
 // @Success 201 {object} SuccessResponse
 // @Failure 500 {string} string "Internal server error"
-// @Router /setup/initialize [post]
+// @Router /api/v1/setup/initialize [post]
 func InitializeExpenseSystem(w http.ResponseWriter, r *http.Request) {
 	err := services.InitializeExpenseSystem()
 	if err != nil {
@@ -47,9 +52,9 @@ func InitializeExpenseSystem(w http.ResponseWriter, r *http.Request) {
 // @Security BearerAuth
 // @Success 201 {object} SuccessResponse
 // @Failure 500 {string} string "Internal server error"
-// @Router /setup/user [post]
+// @Router /api/v1/setup/user [post]
 func SetupNewUser(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	err := services.SetupNewUser(userID)
 	if err != nil {
@@ -73,7 +78,7 @@ func SetupNewUser(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Success 200 {object} SystemOverviewResponse
 // @Failure 500 {string} string "Internal server error"
-// @Router /setup/overview [get]
+// @Router /api/v1/setup/overview [get]
 func GetSystemOverview(w http.ResponseWriter, r *http.Request) {
 	overview, err := services.GetSystemOverview()
 	if err != nil {
@@ -82,13 +87,14 @@ func GetSystemOverview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get properly formatted expense types
-	var expenseTypes []SimpleExpenseTypeResponse
-	expenseTypesData, err := services.GetAllExpenseTypes()
-	if err == nil {
-		for _, expenseType := range expenseTypesData {
-			expenseTypes = append(expenseTypes, convertExpenseTypeToSimpleResponse(&expenseType))
-		}
+	// Get expense types from overview (already formatted)
+	expenseTypesRaw := overview["expense_types"].([]map[string]string)
+	var expenseTypes []ExpenseTypeInfo
+	for _, et := range expenseTypesRaw {
+		expenseTypes = append(expenseTypes, ExpenseTypeInfo{
+			Value: et["value"],
+			Name:  et["name"],
+		})
 	}
 
 	response := SystemOverviewResponse{

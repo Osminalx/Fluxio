@@ -328,8 +328,12 @@ definitions:
     type: object
   api.CreateUserCategoryRequest:
     properties:
-      expense_type_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
+      expense_type:
+        enum:
+        - needs
+        - wants
+        - savings
+        example: needs
         type: string
       name:
         example: Groceries
@@ -401,24 +405,27 @@ definitions:
         example: 25
         type: integer
     type: object
-  api.ExpenseTypeResponse:
+  api.ExpenseTypeInfo:
     properties:
-      id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
       name:
         example: Needs
         type: string
+      value:
+        example: needs
+        type: string
     type: object
-  api.ExpenseTypesListResponse:
+  api.ExpenseTypeResponse:
     properties:
-      count:
-        example: 3
-        type: integer
-      expense_types:
-        items:
-          $ref: '#/definitions/api.SimpleExpenseTypeResponse'
-        type: array
+      name:
+        example: Needs
+        type: string
+      value:
+        enum:
+        - needs
+        - wants
+        - savings
+        example: needs
+        type: string
     type: object
   api.ExpensesByCategoryResponse:
     properties:
@@ -600,28 +607,6 @@ definitions:
         example: contraseña123
         type: string
     type: object
-  api.SimpleExpenseTypeResponse:
-    properties:
-      categories:
-        items:
-          $ref: '#/definitions/api.UserCategoryResponse'
-        type: array
-      created_at:
-        example: "2024-01-15T10:30:00Z"
-        type: string
-      id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      name:
-        example: Needs
-        type: string
-      status:
-        example: active
-        type: string
-      updated_at:
-        example: "2024-01-15T10:30:00Z"
-        type: string
-    type: object
   api.SuccessResponse:
     properties:
       message:
@@ -631,7 +616,7 @@ definitions:
     properties:
       expense_types:
         items:
-          $ref: '#/definitions/api.SimpleExpenseTypeResponse'
+          $ref: '#/definitions/api.ExpenseTypeInfo'
         type: array
       expense_types_count:
         example: 3
@@ -739,8 +724,12 @@ definitions:
     type: object
   api.UpdateUserCategoryRequest:
     properties:
-      expense_type_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
+      expense_type:
+        enum:
+        - needs
+        - wants
+        - savings
+        example: needs
         type: string
       name:
         example: Groceries Updated
@@ -768,33 +757,20 @@ definitions:
         example: 15
         type: integer
     type: object
-  api.UserCategoryExpenseType:
-    properties:
-      created_at:
-        example: "2024-01-15T10:30:00Z"
-        type: string
-      id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      name:
-        example: Needs
-        type: string
-      status:
-        example: active
-        type: string
-      updated_at:
-        example: "2024-01-15T10:30:00Z"
-        type: string
-    type: object
   api.UserCategoryResponse:
     properties:
       created_at:
         example: "2024-01-15T10:30:00Z"
         type: string
       expense_type:
-        $ref: '#/definitions/api.UserCategoryExpenseType'
-      expense_type_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
+        enum:
+        - needs
+        - wants
+        - savings
+        example: needs
+        type: string
+      expense_type_name:
+        example: Needs
         type: string
       id:
         example: 123e4567-e89b-12d3-a456-426614174000
@@ -1259,8 +1235,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BankAccountResponse'
         "400":
           description: Invalid ID
           schema:
@@ -1380,8 +1358,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BankAccountResponse'
         "400":
           description: Invalid ID
           schema:
@@ -1499,6 +1479,180 @@ paths:
       summary: Get deleted bank accounts
       tags:
       - bank_account
+  /api/v1/budget-history:
+    get:
+      consumes:
+      - application/json
+      description: Get all budget history entries for the user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryListResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get all budget history
+      tags:
+      - Budget History
+  /api/v1/budget-history/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific budget history entry by ID
+      parameters:
+      - description: Budget History ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryResponse'
+        "400":
+          description: Budget history ID is required
+          schema:
+            type: string
+        "404":
+          description: Budget history not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get budget history by ID
+      tags:
+      - Budget History
+  /api/v1/budget-history/date-range:
+    get:
+      consumes:
+      - application/json
+      description: Get budget history entries within a specific date range
+      parameters:
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryListResponse'
+        "400":
+          description: Date parameters are required or invalid
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get budget history by date range
+      tags:
+      - Budget History
+  /api/v1/budget-history/patterns:
+    get:
+      consumes:
+      - application/json
+      description: Analyze patterns in budget changes for machine learning insights
+      parameters:
+      - description: Number of months to analyze
+        in: query
+        name: months
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryPatternsResponse'
+        "400":
+          description: Invalid months parameter
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Analyze budget patterns
+      tags:
+      - Budget History
+  /api/v1/budget-history/reasons:
+    get:
+      consumes:
+      - application/json
+      description: Get budget history entries filtered by change reason
+      parameters:
+      - description: Change reason filter
+        in: query
+        name: reason
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryListResponse'
+        "400":
+          description: Reason filter is required
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get budget history with reasons filter
+      tags:
+      - Budget History
+  /api/v1/budget-history/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get statistical information about budget history
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryStatsResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get budget history statistics
+      tags:
+      - Budget History
   /api/v1/budgets:
     get:
       consumes:
@@ -1570,6 +1724,37 @@ paths:
       summary: Create a new budget
       tags:
       - budget
+  /api/v1/budgets/{budget_id}/history:
+    get:
+      consumes:
+      - application/json
+      description: Get all history entries for a specific budget
+      parameters:
+      - description: Budget ID
+        in: path
+        name: budget_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetHistoryListResponse'
+        "400":
+          description: Budget ID is required
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get budget history by budget ID
+      tags:
+      - Budget History
   /api/v1/budgets/{id}:
     delete:
       consumes:
@@ -1584,8 +1769,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetResponse'
         "400":
           description: Invalid ID
           schema:
@@ -1704,8 +1891,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetResponse'
         "400":
           description: Invalid ID
           schema:
@@ -1751,8 +1940,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.BudgetResponse'
         "400":
           description: Invalid request body
           schema:
@@ -1947,8 +2138,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpenseResponse'
         "400":
           description: Invalid ID
           schema:
@@ -2066,8 +2259,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpenseResponse'
         "400":
           description: Invalid ID
           schema:
@@ -2109,8 +2304,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ExpenseResponse'
         "400":
           description: Invalid request body
           schema:
@@ -2967,8 +3164,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.IncomeResponse'
         "400":
           description: Invalid ID
           schema:
@@ -3086,8 +3285,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.IncomeResponse'
         "400":
           description: Invalid ID
           schema:
@@ -3129,8 +3330,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.IncomeResponse'
         "400":
           description: Invalid request body
           schema:
@@ -3510,6 +3713,66 @@ paths:
       summary: Get reminder statistics
       tags:
       - reminders
+  /api/v1/setup/initialize:
+    post:
+      consumes:
+      - application/json
+      description: Initialize the basic expense system with default expense types
+        (Admin only)
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.SuccessResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Initialize expense system
+      tags:
+      - System Setup
+  /api/v1/setup/overview:
+    get:
+      consumes:
+      - application/json
+      description: Get an overview of the expense system setup and configuration
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SystemOverviewResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get system overview
+      tags:
+      - System Setup
+  /api/v1/setup/user:
+    post:
+      consumes:
+      - application/json
+      description: Create default categories for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.SuccessResponse'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Setup new user
+      tags:
+      - System Setup
   /api/v1/transfers:
     get:
       consumes:
@@ -3802,383 +4065,7 @@ paths:
       summary: Get transfer statistics
       tags:
       - transfers
-  /budget-history:
-    get:
-      consumes:
-      - application/json
-      description: Get all budget history entries for the user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryListResponse'
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Get all budget history
-      tags:
-      - Budget History
-  /budget-history/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Get a specific budget history entry by ID
-      parameters:
-      - description: Budget History ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryResponse'
-        "400":
-          description: Budget history ID is required
-          schema:
-            type: string
-        "404":
-          description: Budget history not found
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Get budget history by ID
-      tags:
-      - Budget History
-  /budget-history/date-range:
-    get:
-      consumes:
-      - application/json
-      description: Get budget history entries within a specific date range
-      parameters:
-      - description: Start date (YYYY-MM-DD)
-        in: query
-        name: start_date
-        required: true
-        type: string
-      - description: End date (YYYY-MM-DD)
-        in: query
-        name: end_date
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryListResponse'
-        "400":
-          description: Date parameters are required or invalid
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Get budget history by date range
-      tags:
-      - Budget History
-  /budget-history/patterns:
-    get:
-      consumes:
-      - application/json
-      description: Analyze patterns in budget changes for machine learning insights
-      parameters:
-      - description: Number of months to analyze
-        in: query
-        name: months
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryPatternsResponse'
-        "400":
-          description: Invalid months parameter
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Analyze budget patterns
-      tags:
-      - Budget History
-  /budget-history/reasons:
-    get:
-      consumes:
-      - application/json
-      description: Get budget history entries filtered by change reason
-      parameters:
-      - description: Change reason filter
-        in: query
-        name: reason
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryListResponse'
-        "400":
-          description: Reason filter is required
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Get budget history with reasons filter
-      tags:
-      - Budget History
-  /budget-history/stats:
-    get:
-      consumes:
-      - application/json
-      description: Get statistical information about budget history
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryStatsResponse'
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Get budget history statistics
-      tags:
-      - Budget History
-  /budgets/{budget_id}/history:
-    get:
-      consumes:
-      - application/json
-      description: Get all history entries for a specific budget
-      parameters:
-      - description: Budget ID
-        in: path
-        name: budget_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryListResponse'
-        "400":
-          description: Budget ID is required
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Get budget history by budget ID
-      tags:
-      - Budget History
-  /expense-types:
-    get:
-      consumes:
-      - application/json
-      description: Get all active expense types (Needs, Wants, Savings)
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.ExpenseTypesListResponse'
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Get all expense types
-      tags:
-      - Expense Types
-  /expense-types/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Get a specific expense type by ID
-      parameters:
-      - description: Expense Type ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.SimpleExpenseTypeResponse'
-        "400":
-          description: Expense type ID is required
-          schema:
-            type: string
-        "404":
-          description: Expense type not found
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Get expense type by ID
-      tags:
-      - Expense Types
-  /expense-types/name/{name}:
-    get:
-      consumes:
-      - application/json
-      description: Get a specific expense type by name (Needs, Wants, Savings)
-      parameters:
-      - description: Expense Type Name
-        enum:
-        - Needs
-        - Wants
-        - Savings
-        in: path
-        name: name
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.SimpleExpenseTypeResponse'
-        "400":
-          description: Expense type name is required
-          schema:
-            type: string
-        "404":
-          description: Expense type not found
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Get expense type by name
-      tags:
-      - Expense Types
-  /expense-types/with-categories:
-    get:
-      consumes:
-      - application/json
-      description: Get all expense types with the authenticated user's categories
-        loaded
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.ExpenseTypesListResponse'
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Get expense types with user categories
-      tags:
-      - Expense Types
-  /setup/initialize:
-    post:
-      consumes:
-      - application/json
-      description: Initialize the basic expense system with default expense types
-        (Admin only)
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/api.SuccessResponse'
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Initialize expense system
-      tags:
-      - System Setup
-  /setup/overview:
-    get:
-      consumes:
-      - application/json
-      description: Get an overview of the expense system setup and configuration
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.SystemOverviewResponse'
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Get system overview
-      tags:
-      - System Setup
-  /setup/user:
-    post:
-      consumes:
-      - application/json
-      description: Create default categories for the authenticated user
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/api.SuccessResponse'
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Setup new user
-      tags:
-      - System Setup
-  /user-categories:
+  /api/v1/user-categories:
     get:
       consumes:
       - application/json
@@ -4239,7 +4126,7 @@ paths:
       summary: Create user category
       tags:
       - User Categories
-  /user-categories/{id}:
+  /api/v1/user-categories/{id}:
     delete:
       consumes:
       - application/json
@@ -4253,8 +4140,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.UserCategoryResponse'
         "400":
           description: Category ID is required
           schema:
@@ -4354,7 +4243,7 @@ paths:
       summary: Update user category
       tags:
       - User Categories
-  /user-categories/{id}/restore:
+  /api/v1/user-categories/{id}/restore:
     post:
       consumes:
       - application/json
@@ -4368,8 +4257,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.UserCategoryResponse'
         "400":
           description: Invalid request or category can't be restored
           schema:
@@ -4391,7 +4282,7 @@ paths:
       summary: Restore user category
       tags:
       - User Categories
-  /user-categories/defaults:
+  /api/v1/user-categories/defaults:
     post:
       consumes:
       - application/json
@@ -4412,7 +4303,7 @@ paths:
       summary: Create default user categories
       tags:
       - User Categories
-  /user-categories/expense-type-name/{expense_type_name}:
+  /api/v1/user-categories/expense-type-name/{expense_type_name}:
     get:
       consumes:
       - application/json
@@ -4448,15 +4339,15 @@ paths:
       summary: Get user categories by expense type name
       tags:
       - User Categories
-  /user-categories/expense-type/{expense_type_id}:
+  /api/v1/user-categories/expense-type/{expense_type}:
     get:
       consumes:
       - application/json
       description: Get user categories for a specific expense type
       parameters:
-      - description: Expense Type ID
+      - description: Expense Type
         in: path
-        name: expense_type_id
+        name: expense_type
         required: true
         type: string
       - description: Include deleted categories
@@ -4471,7 +4362,7 @@ paths:
           schema:
             $ref: '#/definitions/api.UserCategoriesListResponse'
         "400":
-          description: Expense type ID is required
+          description: Expense type is required or invalid
           schema:
             type: string
         "500":
@@ -4483,7 +4374,7 @@ paths:
       summary: Get user categories by expense type
       tags:
       - User Categories
-  /user-categories/grouped:
+  /api/v1/user-categories/grouped:
     get:
       consumes:
       - application/json
@@ -4504,7 +4395,7 @@ paths:
       summary: Get user categories grouped by type
       tags:
       - User Categories
-  /user-categories/stats:
+  /api/v1/user-categories/stats:
     get:
       consumes:
       - application/json

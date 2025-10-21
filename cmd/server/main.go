@@ -563,43 +563,8 @@ func handleUserCategoryRoutes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handleExpenseTypeRoutes manages routing for expense type endpoints
-func handleExpenseTypeRoutes(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Path
-	
-	switch {
-	case path == "/api/v1/expense-types":
-		if r.Method == http.MethodGet {
-			api.GetAllExpenseTypes(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case path == "/api/v1/expense-types/with-categories":
-		if r.Method == http.MethodGet {
-			api.GetExpenseTypesWithUserCategories(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case strings.HasPrefix(path, "/api/v1/expense-types/name/"):
-		if r.Method == http.MethodGet {
-			api.GetExpenseTypeByName(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case strings.HasPrefix(path, "/api/v1/expense-types/"):
-		if r.Method == http.MethodGet {
-			api.GetExpenseTypeByID(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	default:
-		http.Error(w, "Not found", http.StatusNotFound)
-	}
-}
+// Expense types are now fixed enums (needs/wants/savings) - no API endpoints needed
+// Use /api/v1/user-categories/grouped to get categories organized by expense type
 
 // handleSetupRoutes manages routing for system setup endpoints
 func handleSetupRoutes(w http.ResponseWriter, r *http.Request) {
@@ -763,12 +728,6 @@ func main() {
 	mux.HandleFunc("/api/v1/auth/logout", api.LogoutHandler)
 	mux.HandleFunc("/api/v1/auth/logout-all", api.LogoutAllHandler)
 	
-	
-	
-	// Expense Types endpoints - PUBLIC (read-only, no auth needed for basic info)
-	mux.HandleFunc("/api/v1/expense-types", handleExpenseTypeRoutes)
-	mux.HandleFunc("/api/v1/expense-types/", handleExpenseTypeRoutes)
-	
 	// Setup endpoints - PUBLIC (system initialization)
 	mux.HandleFunc("/api/v1/setup/", handleSetupRoutes)
 
@@ -819,10 +778,6 @@ func main() {
 	protectedMux.HandleFunc("/api/v1/transfers", handleTransferRoutes)
 	protectedMux.HandleFunc("/api/v1/transfers/", handleTransferRoutes)
 	
-	// Expense Types endpoints - PROTECTED (for endpoints that need user context)
-	protectedMux.HandleFunc("/api/v1/expense-types", handleExpenseTypeRoutes)
-	protectedMux.HandleFunc("/api/v1/expense-types/", handleExpenseTypeRoutes)
-	
 	// Apply auth middleware to protected API v1 routes
 	mux.Handle("/api/v1/protected/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/auth/me", auth.AuthMiddleware(protectedMux))
@@ -846,7 +801,6 @@ func main() {
 	mux.Handle("/api/v1/reminders/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/transfers", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/transfers/", auth.AuthMiddleware(protectedMux))
-	mux.Handle("/api/v1/expense-types/with-categories", auth.AuthMiddleware(protectedMux))
 
 	// Serve swagger.json file
 	mux.HandleFunc("/docs/swagger.json", func(w http.ResponseWriter, r *http.Request) {

@@ -1,21 +1,16 @@
 package services
 
 import (
+	"github.com/Osminalx/fluxio/internal/models"
 	"github.com/Osminalx/fluxio/pkg/utils/logger"
 )
 
-// InitializeExpenseSystem initializes the basic expense types (Needs/Wants/Savings)
-// This should only be called once during system setup
+// InitializeExpenseSystem initializes the expense system
+// Since expense types are now fixed enums (needs/wants/savings), no database initialization is needed
 func InitializeExpenseSystem() error {
-	logger.Info("Initializing expense system with default data...")
-	
-	// Creates the default expense types (only 3: Needs, Wants, Savings)
-	if err := InitializeDefaultExpenseTypes(); err != nil {
-		logger.Error("Error initializing default expense types: %v", err)
-		return err
-	}
-	
-	logger.Info("Expense system initialized successfully!")
+	logger.Info("Expense system initialization check...")
+	logger.Info("Expense types are fixed: %v", models.ValidExpenseTypes())
+	logger.Info("Expense system ready!")
 	return nil
 }
 
@@ -37,20 +32,26 @@ func SetupNewUser(userID string) error {
 func GetSystemOverview() (map[string]interface{}, error) {
 	overview := make(map[string]interface{})
 	
-	// Count expense types (these are fixed: Needs, Wants, Savings)
-	expenseTypes, err := GetActiveExpenseTypes()
-	if err != nil {
-		return nil, err
-	}
+	// Expense types are now fixed enums
+	expenseTypes := models.ValidExpenseTypes()
 	overview["expense_types_count"] = len(expenseTypes)
-	overview["expense_types"] = expenseTypes
 	
-	// In the new architecture, categories belong to specific users
-	// We only show information about the fixed expense types
+	// Build expense types info
+	var expenseTypesInfo []map[string]string
+	for _, et := range expenseTypes {
+		expenseTypesInfo = append(expenseTypesInfo, map[string]string{
+			"value": string(et),
+			"name":  models.GetExpenseTypeName(et),
+		})
+	}
+	overview["expense_types"] = expenseTypesInfo
+	
+	// System info
 	overview["system_info"] = map[string]interface{}{
-		"architecture": "user_specific_categories",
-		"expense_types": []string{"Needs (50%)", "Wants (30%)", "Savings (20%)"},
-		"note": "Categories are created per user. Use GetUserCategoriesGroupedByType(userID) for user-specific data.",
+		"architecture":   "user_specific_categories",
+		"expense_types":  []string{"Needs (50%)", "Wants (30%)", "Savings (20%)"},
+		"note":           "ExpenseTypes are now fixed enums. Categories are created per user.",
+		"valid_types":    []string{"needs", "wants", "savings"},
 	}
 	
 	logger.Info("System overview generated successfully")

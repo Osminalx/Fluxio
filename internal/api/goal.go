@@ -80,7 +80,7 @@ func convertGoalToResponse(goal *models.Goal) GoalResponse {
 // @Security bearerAuth
 // @Router /api/v1/goals [post]
 func CreateGoalHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	var req CreateGoalRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -138,7 +138,7 @@ func CreateGoalHandler(w http.ResponseWriter, r *http.Request) {
 // @Security bearerAuth
 // @Router /api/v1/goals [get]
 func GetAllGoalsHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	goals, err := services.GetGoals(userID, true) // Include deleted
 	if err != nil {
@@ -172,7 +172,7 @@ func GetAllGoalsHandler(w http.ResponseWriter, r *http.Request) {
 // @Security bearerAuth
 // @Router /api/v1/goals/active [get]
 func GetActiveGoalsHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	goals, err := services.GetGoals(userID, false) // Don't include deleted
 	if err != nil {
@@ -206,7 +206,7 @@ func GetActiveGoalsHandler(w http.ResponseWriter, r *http.Request) {
 // @Security bearerAuth
 // @Router /api/v1/goals/deleted [get]
 func GetDeletedGoalsHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	// Get all goals and filter deleted ones
 	allGoals, err := services.GetGoals(userID, true)
@@ -251,7 +251,7 @@ func GetDeletedGoalsHandler(w http.ResponseWriter, r *http.Request) {
 // @Security bearerAuth
 // @Router /api/v1/goals/{id} [get]
 func GetGoalByIDHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	// Extract goal ID from URL
 	goalID := strings.TrimPrefix(r.URL.Path, "/api/v1/goals/")
@@ -288,7 +288,7 @@ func GetGoalByIDHandler(w http.ResponseWriter, r *http.Request) {
 // @Security bearerAuth
 // @Router /api/v1/goals/{id} [patch]
 func UpdateGoalHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	// Extract goal ID from URL
 	goalID := strings.TrimPrefix(r.URL.Path, "/api/v1/goals/")
@@ -364,7 +364,7 @@ func UpdateGoalHandler(w http.ResponseWriter, r *http.Request) {
 // @Security bearerAuth
 // @Router /api/v1/goals/{id} [delete]
 func DeleteGoalHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	// Extract goal ID from URL
 	goalID := strings.TrimPrefix(r.URL.Path, "/api/v1/goals/")
@@ -400,7 +400,7 @@ func DeleteGoalHandler(w http.ResponseWriter, r *http.Request) {
 // @Security bearerAuth
 // @Router /api/v1/goals/{id}/restore [post]
 func RestoreGoalHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	// Extract goal ID from URL path
 	path := strings.TrimPrefix(r.URL.Path, "/api/v1/goals/")
@@ -447,7 +447,7 @@ type ChangeGoalStatusRequest struct {
 // @Security bearerAuth
 // @Router /api/v1/goals/{id}/status [patch]
 func ChangeGoalStatusHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(string)
+	userID := r.Context().Value("userID").(string)
 
 	// Extract goal ID from URL path
 	path := strings.TrimPrefix(r.URL.Path, "/api/v1/goals/")

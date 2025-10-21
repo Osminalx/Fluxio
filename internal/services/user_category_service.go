@@ -16,18 +16,16 @@ func CreateUserCategory(userID string, category *models.Category) error {
 	category.UserID = uuid.MustParse(userID)
 	category.Status = models.StatusActive
 	
-	// Check if the ExpenseType exists and is active
-	var expenseType models.ExpenseType
-	result := db.DB.Where("id = ? AND status IN ?", category.ExpenseTypeID, models.GetActiveStatuses()).First(&expenseType)
-	if result.Error != nil {
-		logger.Error("ExpenseType not found or not active")
-		return errors.New("expense type not found or not active")
+	// Validate that the ExpenseType is valid
+	if !models.IsValidExpenseType(string(category.ExpenseType)) {
+		logger.Error("Invalid expense type: %s", category.ExpenseType)
+		return errors.New("invalid expense type. Must be one of: needs, wants, savings")
 	}
 	
 	// Check if there is another category with the same name for this user in this type
 	var existingCategory models.Category
-	result = db.DB.Where("LOWER(name) = LOWER(?) AND user_id = ? AND expense_type_id = ? AND status IN ?", 
-		category.Name, userID, category.ExpenseTypeID, models.GetActiveStatuses()).First(&existingCategory)
+	result := db.DB.Where("LOWER(name) = LOWER(?) AND user_id = ? AND expense_type = ? AND status IN ?", 
+		category.Name, userID, category.ExpenseType, models.GetActiveStatuses()).First(&existingCategory)
 	if result.Error == nil {
 		logger.Error("Category with this name already exists for this user in this expense type")
 		return errors.New("you already have a category with this name in this expense type")
@@ -47,7 +45,7 @@ func CreateUserCategory(userID string, category *models.Category) error {
 func GetUserCategoryByID(userID string, id string) (*models.Category, error) {
 	var category models.Category
 	result := db.DB.Where("user_id = ? AND id = ? AND status IN ?", userID, id, models.GetVisibleStatuses()).
-		Preload("ExpenseType").First(&category)
+		First(&category)
 	if result.Error != nil {
 		logger.Error("Error getting user category by id: %v", result.Error)
 		return nil, result.Error
@@ -60,13 +58,13 @@ func GetUserCategoryByID(userID string, id string) (*models.Category, error) {
 // GetUserCategories gets all categories for the user
 func GetUserCategories(userID string, includeDeleted bool) ([]models.Category, error) {
 	var categories []models.Category
-	query := db.DB.Where("user_id = ?", userID).Preload("ExpenseType")
+	query := db.DB.Where("user_id = ?", userID)
 	
 	if !includeDeleted {
 		query = query.Where("status IN ?", models.GetVisibleStatuses())
 	}
 	
-	result := query.Order("expense_type_id, name ASC").Find(&categories)
+	result := query.Order("expense_type, name ASC").Find(&categories)
 	if result.Error != nil {
 		logger.Error("Error getting user categories: %v", result.Error)
 		return nil, result.Error
@@ -77,9 +75,14 @@ func GetUserCategories(userID string, includeDeleted bool) ([]models.Category, e
 }
 
 // GetUserCategoriesByExpenseType gets user categories for a specific expense type
-func GetUserCategoriesByExpenseType(userID string, expenseTypeID string, includeDeleted bool) ([]models.Category, error) {
+func GetUserCategoriesByExpenseType(userID string, expenseType string, includeDeleted bool) ([]models.Category, error) {
+	// Validate expense type
+	if !models.IsValidExpenseType(expenseType) {
+		return nil, errors.New("invalid expense type. Must be one of: needs, wants, savings")
+	}
+	
 	var categories []models.Category
-	query := db.DB.Where("user_id = ? AND expense_type_id = ?", userID, expenseTypeID).Preload("ExpenseType")
+	query := db.DB.Where("user_id = ? AND expense_type = ?", userID, expenseType)
 	
 	if !includeDeleted {
 		query = query.Where("status IN ?", models.GetVisibleStatuses())
@@ -95,15 +98,23 @@ func GetUserCategoriesByExpenseType(userID string, expenseTypeID string, include
 	return categories, nil
 }
 
-// GetUserCategoriesByExpenseTypeName gets user categories for a specific expense type by name
+// GetUserCategoriesByExpenseTypeName gets user categories for a specific expense type by name (kept for backward compatibility)
 func GetUserCategoriesByExpenseTypeName(userID string, expenseTypeName string) ([]models.Category, error) {
-	// Primero obtener el ExpenseType
-	expenseType, err := GetExpenseTypeByName(expenseTypeName)
-	if err != nil {
-		return nil, err
+	// Convert name to lowercase enum value
+	expenseType := expenseTypeName
+	switch expenseTypeName {
+	case "Needs":
+		expenseType = string(models.ExpenseTypeNeeds)
+	case "Wants":
+		expenseType = string(models.ExpenseTypeWants)
+	case "Savings":
+		expenseType = string(models.ExpenseTypeSavings)
+	default:
+		// Try as-is if already lowercase
+		expenseType = expenseTypeName
 	}
 	
-	return GetUserCategoriesByExpenseType(userID, expenseType.ID.String(), false)
+	return GetUserCategoriesByExpenseType(userID, expenseType, false)
 }
 
 // GetUserCategoriesGroupedByType gets user categories grouped by expense type
@@ -115,7 +126,7 @@ func GetUserCategoriesGroupedByType(userID string) (map[string][]models.Category
 	
 	grouped := make(map[string][]models.Category)
 	for _, category := range categories {
-		typeName := category.ExpenseType.Name
+		typeName := models.GetExpenseTypeName(category.ExpenseType)
 		grouped[typeName] = append(grouped[typeName], category)
 	}
 	
@@ -127,28 +138,26 @@ func GetUserCategoriesGroupedByType(userID string) (map[string][]models.Category
 func UpdateUserCategory(userID string, id string, updatedCategory *models.Category) (*models.Category, error) {
 	var existingCategory models.Category
 	
-	// Verificar que la categoría existe, pertenece al usuario y no está eliminada
+	// Verify that the category exists, belongs to the user and is not deleted
 	result := db.DB.Where("user_id = ? AND id = ? AND status IN ?", userID, id, models.GetVisibleStatuses()).First(&existingCategory)
 	if result.Error != nil {
 		logger.Error("User category not found: %v", result.Error)
 		return nil, errors.New("category not found or access denied")
 	}
 	
-	// Verificar que el ExpenseType existe y está activo si se está cambiando
-	if existingCategory.ExpenseTypeID != updatedCategory.ExpenseTypeID {
-		var expenseType models.ExpenseType
-		result := db.DB.Where("id = ? AND status IN ?", updatedCategory.ExpenseTypeID, models.GetActiveStatuses()).First(&expenseType)
-		if result.Error != nil {
-			logger.Error("ExpenseType not found or not active")
-			return nil, errors.New("expense type not found or not active")
+	// Validate the ExpenseType if it's being changed
+	if existingCategory.ExpenseType != updatedCategory.ExpenseType {
+		if !models.IsValidExpenseType(string(updatedCategory.ExpenseType)) {
+			logger.Error("Invalid expense type: %s", updatedCategory.ExpenseType)
+			return nil, errors.New("invalid expense type. Must be one of: needs, wants, savings")
 		}
 	}
 	
 	// Check if the name is unique in the type for this user if it is being changed
-	if existingCategory.Name != updatedCategory.Name || existingCategory.ExpenseTypeID != updatedCategory.ExpenseTypeID {
+	if existingCategory.Name != updatedCategory.Name || existingCategory.ExpenseType != updatedCategory.ExpenseType {
 		var duplicateCategory models.Category
-		checkResult := db.DB.Where("LOWER(name) = LOWER(?) AND user_id = ? AND expense_type_id = ? AND id != ? AND status IN ?", 
-			updatedCategory.Name, userID, updatedCategory.ExpenseTypeID, id, models.GetActiveStatuses()).First(&duplicateCategory)
+		checkResult := db.DB.Where("LOWER(name) = LOWER(?) AND user_id = ? AND expense_type = ? AND id != ? AND status IN ?", 
+			updatedCategory.Name, userID, updatedCategory.ExpenseType, id, models.GetActiveStatuses()).First(&duplicateCategory)
 		if checkResult.Error == nil {
 			logger.Error("Category name already exists for this user in this expense type")
 			return nil, errors.New("you already have a category with this name in this expense type")
@@ -169,8 +178,8 @@ func UpdateUserCategory(userID string, id string, updatedCategory *models.Catego
 		return nil, result.Error
 	}
 	
-	// Get the updated category with relations
-	result = db.DB.Where("user_id = ? AND id = ?", userID, id).Preload("ExpenseType").First(&existingCategory)
+	// Get the updated category
+	result = db.DB.Where("user_id = ? AND id = ?", userID, id).First(&existingCategory)
 	if result.Error != nil {
 		logger.Error("Error retrieving updated user category: %v", result.Error)
 		return nil, result.Error
@@ -225,18 +234,16 @@ func RestoreUserCategory(userID string, id string) (*models.Category, error) {
 		return nil, errors.New("category not found, not deleted, or access denied")
 	}
 	
-	// Check if the ExpenseType is active
-	var expenseType models.ExpenseType
-	result = db.DB.Where("id = ? AND status IN ?", existingCategory.ExpenseTypeID, models.GetActiveStatuses()).First(&expenseType)
-	if result.Error != nil {
-		logger.Error("Cannot restore category: expense type is not active")
-		return nil, errors.New("cannot restore category: expense type is not active")
+	// Validate that the ExpenseType is still valid (it should always be since it's an enum)
+	if !models.IsValidExpenseType(string(existingCategory.ExpenseType)) {
+		logger.Error("Cannot restore category: expense type is not valid")
+		return nil, errors.New("cannot restore category: expense type is not valid")
 	}
 	
 	// Check if there is a conflict of names
 	var duplicateCategory models.Category
-	checkResult := db.DB.Where("LOWER(name) = LOWER(?) AND user_id = ? AND expense_type_id = ? AND id != ? AND status IN ?", 
-		existingCategory.Name, userID, existingCategory.ExpenseTypeID, id, models.GetActiveStatuses()).First(&duplicateCategory)
+	checkResult := db.DB.Where("LOWER(name) = LOWER(?) AND user_id = ? AND expense_type = ? AND id != ? AND status IN ?", 
+		existingCategory.Name, userID, existingCategory.ExpenseType, id, models.GetActiveStatuses()).First(&duplicateCategory)
 	if checkResult.Error == nil {
 		logger.Error("Cannot restore: category name already exists for this user in this expense type")
 		return nil, errors.New("cannot restore: you already have a category with this name in this expense type")
@@ -267,43 +274,25 @@ func RestoreUserCategory(userID string, id string) (*models.Category, error) {
 
 // CreateDefaultUserCategories creates default categories for a new user
 func CreateDefaultUserCategories(userID string) error {
-	// Get the expense types
-	expenseTypes, err := GetActiveExpenseTypes()
-	if err != nil {
-		return err
-	}
-	
-	// Map types by name to facilitate creation
-	typeMap := make(map[string]uuid.UUID)
-	for _, et := range expenseTypes {
-		typeMap[et.Name] = et.ID
-	}
-	
-	// Define default categories more simple and common
-	defaultCategories := map[string][]string{
-		"Needs": {
+	// Define default categories for each expense type
+	defaultCategories := map[models.ExpenseType][]string{
+		models.ExpenseTypeNeeds: {
 			"Vivienda", "Alimentación", "Transporte", "Salud", "Servicios básicos",
 		},
-		"Wants": {
+		models.ExpenseTypeWants: {
 			"Entretenimiento", "Restaurantes", "Shopping", "Hobbies", "Viajes",
 		},
-		"Savings": {
+		models.ExpenseTypeSavings: {
 			"Fondo de emergencia", "Ahorro general", "Inversiones",
 		},
 	}
 	
-	for typeName, categoryNames := range defaultCategories {
-		typeID, exists := typeMap[typeName]
-		if !exists {
-			logger.Error("ExpenseType %s not found", typeName)
-			continue
-		}
-		
+	for expenseType, categoryNames := range defaultCategories {
 		for _, categoryName := range categoryNames {
 			category := models.Category{
-				UserID:        uuid.MustParse(userID),
-				Name:          categoryName,
-				ExpenseTypeID: typeID,
+				UserID:      uuid.MustParse(userID),
+				Name:        categoryName,
+				ExpenseType: expenseType,
 			}
 			
 			// Create category (CreateUserCategory already checks for duplicates)
@@ -330,16 +319,11 @@ func GetUserCategoryStats(userID string) (map[string]interface{}, error) {
 	
 	// Categories by type
 	typeStats := make(map[string]int64)
-	expenseTypes, err := GetActiveExpenseTypes()
-	if err != nil {
-		return nil, err
-	}
-	
-	for _, expenseType := range expenseTypes {
+	for _, expenseType := range models.ValidExpenseTypes() {
 		var count int64
-		db.DB.Model(&models.Category{}).Where("user_id = ? AND expense_type_id = ? AND status IN ?", 
-			userID, expenseType.ID, models.GetActiveStatuses()).Count(&count)
-		typeStats[expenseType.Name] = count
+		db.DB.Model(&models.Category{}).Where("user_id = ? AND expense_type = ? AND status IN ?", 
+			userID, expenseType, models.GetActiveStatuses()).Count(&count)
+		typeStats[models.GetExpenseTypeName(expenseType)] = count
 	}
 	stats["categories_by_type"] = typeStats
 	
