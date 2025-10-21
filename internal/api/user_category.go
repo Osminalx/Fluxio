@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/Osminalx/fluxio/internal/models"
 	"github.com/Osminalx/fluxio/internal/services"
@@ -155,7 +156,15 @@ func CreateUserCategory(w http.ResponseWriter, r *http.Request) {
 // @Router /api/v1/user-categories/{id} [get]
 func GetUserCategoryByID(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("userID").(string)
-	id := r.PathValue("id")
+	
+	// Extract ID from URL path
+	path := r.URL.Path
+	id := path[len("/api/v1/user-categories/"):]
+	
+	// Remove any trailing slashes or additional path segments
+	if idx := strings.Index(id, "/"); idx != -1 {
+		id = id[:idx]
+	}
 
 	if id == "" {
 		http.Error(w, "Category ID is required", http.StatusBadRequest)
@@ -225,7 +234,14 @@ func GetUserCategories(w http.ResponseWriter, r *http.Request) {
 // @Router /api/v1/user-categories/expense-type/{expense_type} [get]
 func GetUserCategoriesByExpenseType(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("userID").(string)
-	expenseType := r.PathValue("expense_type")
+	
+	// Extract expense_type from URL path
+	path := r.URL.Path
+	expenseType := path[len("/api/v1/user-categories/expense-type/"):]
+	
+	// Remove any trailing slashes
+	expenseType = strings.TrimSuffix(expenseType, "/")
+	
 	includeDeleted := r.URL.Query().Get("include_deleted") == "true"
 
 	if expenseType == "" {
@@ -274,7 +290,13 @@ func GetUserCategoriesByExpenseType(w http.ResponseWriter, r *http.Request) {
 // @Router /api/v1/user-categories/expense-type-name/{expense_type_name} [get]
 func GetUserCategoriesByExpenseTypeName(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("userID").(string)
-	expenseTypeName := r.PathValue("expense_type_name")
+	
+	// Extract expense_type_name from URL path
+	path := r.URL.Path
+	expenseTypeName := path[len("/api/v1/user-categories/expense-type-name/"):]
+	
+	// Remove any trailing slashes
+	expenseTypeName = strings.TrimSuffix(expenseTypeName, "/")
 
 	if expenseTypeName == "" {
 		http.Error(w, "Expense type name is required", http.StatusBadRequest)
@@ -360,7 +382,15 @@ func GetUserCategoriesGroupedByType(w http.ResponseWriter, r *http.Request) {
 // @Router /api/v1/user-categories/{id} [put]
 func UpdateUserCategory(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("userID").(string)
-	id := r.PathValue("id")
+	
+	// Extract ID from URL path
+	path := r.URL.Path
+	id := path[len("/api/v1/user-categories/"):]
+	
+	// Remove any trailing slashes or additional path segments
+	if idx := strings.Index(id, "/"); idx != -1 {
+		id = id[:idx]
+	}
 
 	if id == "" {
 		http.Error(w, "Category ID is required", http.StatusBadRequest)
@@ -436,7 +466,15 @@ func UpdateUserCategory(w http.ResponseWriter, r *http.Request) {
 // @Router /api/v1/user-categories/{id} [delete]
 func SoftDeleteUserCategory(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("userID").(string)
-	id := r.PathValue("id")
+	
+	// Extract ID from URL path
+	path := r.URL.Path
+	id := path[len("/api/v1/user-categories/"):]
+	
+	// Remove any trailing slashes or additional path segments
+	if idx := strings.Index(id, "/"); idx != -1 {
+		id = id[:idx]
+	}
 
 	if id == "" {
 		http.Error(w, "Category ID is required", http.StatusBadRequest)
@@ -476,7 +514,11 @@ func SoftDeleteUserCategory(w http.ResponseWriter, r *http.Request) {
 // @Router /api/v1/user-categories/{id}/restore [post]
 func RestoreUserCategory(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("userID").(string)
-	id := r.PathValue("id")
+	
+	// Extract ID from URL path - remove "/api/v1/user-categories/" and "/restore"
+	path := r.URL.Path
+	id := path[len("/api/v1/user-categories/"):]
+	id = strings.TrimSuffix(id, "/restore")
 
 	if id == "" {
 		http.Error(w, "Category ID is required", http.StatusBadRequest)

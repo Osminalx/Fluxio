@@ -433,12 +433,12 @@ func GetExpensesSummaryByPeriod(userID string, startDate, endDate time.Time) (ma
 	}
 	
 	result = db.DB.Table("expenses e").
-		Select(`CASE 
+		Select(`(CASE 
 			WHEN c.expense_type = 'needs' THEN 'Needs'
 			WHEN c.expense_type = 'wants' THEN 'Wants'
 			WHEN c.expense_type = 'savings' THEN 'Savings'
-			ELSE c.expense_type
-		END as expense_type_name, 
+			ELSE c.expense_type::text
+		END)::text as expense_type_name, 
 		COALESCE(SUM(e.amount), 0) as total_amount, 
 		COUNT(e.id) as count`).
 		Joins("JOIN categories c ON e.category_id = c.id").
@@ -464,12 +464,12 @@ func GetExpensesSummaryByPeriod(userID string, startDate, endDate time.Time) (ma
 	
 	result = db.DB.Table("expenses e").
 		Select(`c.name as category_name, 
-		CASE 
+		(CASE 
 			WHEN c.expense_type = 'needs' THEN 'Needs'
 			WHEN c.expense_type = 'wants' THEN 'Wants'
 			WHEN c.expense_type = 'savings' THEN 'Savings'
-			ELSE c.expense_type
-		END as expense_type_name, 
+			ELSE c.expense_type::text
+		END)::text as expense_type_name, 
 		COALESCE(SUM(e.amount), 0) as total_amount, 
 		COUNT(e.id) as count`).
 		Joins("JOIN categories c ON e.category_id = c.id").
@@ -506,12 +506,12 @@ func GetExpensesByExpenseType(userID string, startDate, endDate time.Time) (map[
 	}
 	
 	result := db.DB.Table("expenses e").
-		Select(`CASE 
+		Select(`(CASE 
 			WHEN c.expense_type = 'needs' THEN 'Needs'
 			WHEN c.expense_type = 'wants' THEN 'Wants'
 			WHEN c.expense_type = 'savings' THEN 'Savings'
-			ELSE c.expense_type
-		END as expense_type_name, 
+			ELSE c.expense_type::text
+		END)::text as expense_type_name, 
 		COALESCE(SUM(e.amount), 0) as total_amount`).
 		Joins("JOIN categories c ON e.category_id = c.id").
 		Where("e.user_id = ? AND e.date BETWEEN ? AND ? AND e.status IN ?", 
@@ -638,12 +638,12 @@ func GetSpendingTrends(userID string, months int) (map[string]interface{}, error
 	
 	result = db.DB.Table("expenses e").
 		Select(`TO_CHAR(e.date, 'YYYY-MM') as month, 
-		CASE 
+		(CASE 
 			WHEN c.expense_type = 'needs' THEN 'Needs'
 			WHEN c.expense_type = 'wants' THEN 'Wants'
 			WHEN c.expense_type = 'savings' THEN 'Savings'
-			ELSE c.expense_type
-		END as expense_type_name, 
+			ELSE c.expense_type::text
+		END)::text as expense_type_name, 
 		COALESCE(SUM(e.amount), 0) as total_amount`).
 		Joins("JOIN categories c ON e.category_id = c.id").
 		Where("e.user_id = ? AND e.date >= ? AND e.status IN ?", 
