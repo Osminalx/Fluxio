@@ -8,22 +8,26 @@ import (
 	"github.com/Osminalx/fluxio/internal/models"
 	"github.com/Osminalx/fluxio/internal/services"
 	"github.com/Osminalx/fluxio/pkg/utils/logger"
+	"github.com/google/uuid"
 )
 
 // Request and response structures
 type CreateIncomeRequest struct {
-	Amount float64 `json:"amount" example:"2500.50"`
-	Date   string  `json:"date" example:"2024-01-15"`
+	Amount        float64 `json:"amount" example:"2500.50"`
+	BankAccountID string  `json:"bank_account_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Date          string  `json:"date" example:"2024-01-15"`
 }
 
 type UpdateIncomeRequest struct {
-	Amount *float64 `json:"amount,omitempty" example:"2800.75"`
-	Date   *string  `json:"date,omitempty" example:"2024-01-16"`
+	Amount        *float64 `json:"amount,omitempty" example:"2800.75"`
+	BankAccountID *string  `json:"bank_account_id,omitempty" example:"123e4567-e89b-12d3-a456-426614174000"`
+	Date          *string  `json:"date,omitempty" example:"2024-01-16"`
 }
 
 type IncomeResponse struct {
 	ID              string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
 	Amount          float64 `json:"amount" example:"2500.50"`
+	BankAccountID   string  `json:"bank_account_id" example:"123e4567-e89b-12d3-a456-426614174000"`
 	Date            string  `json:"date" example:"2024-01-15"`
 	Status          string  `json:"status" example:"active"`
 	StatusChangedAt *string `json:"status_changed_at,omitempty" example:"2024-01-15T10:30:00Z"`
@@ -39,12 +43,13 @@ type IncomesListResponse struct {
 // Helper function to convert model to response
 func convertIncomeToResponse(income *models.Income) IncomeResponse {
 	response := IncomeResponse{
-		ID:        income.ID.String(),
-		Amount:    income.Amount,
-		Date:      income.Date.Format("2006-01-02"),
-		Status:    string(income.Status),
-		CreatedAt: income.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt: income.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		ID:            income.ID.String(),
+		Amount:        income.Amount,
+		BankAccountID: income.BankAccountID.String(),
+		Date:          income.Date.Format("2006-01-02"),
+		Status:        string(income.Status),
+		CreatedAt:     income.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt:     income.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 	
 	if income.StatusChangedAt != nil {
@@ -99,9 +104,22 @@ func CreateIncomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.BankAccountID == "" {
+		http.Error(w, "Bank account ID is required", http.StatusBadRequest)
+		return
+	}
+
+	// Parse bank account ID
+	bankAccountID, err := uuid.Parse(req.BankAccountID)
+	if err != nil {
+		http.Error(w, "Invalid bank account ID format", http.StatusBadRequest)
+		return
+	}
+
 	// Create the model
 	income := &models.Income{
-		Amount: req.Amount,
+		Amount:        req.Amount,
+		BankAccountID: bankAccountID,
 	}
 
 	// Parse the date

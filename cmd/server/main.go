@@ -211,72 +211,6 @@ func handleExpenseRoutes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handleBudgetRoutes manages routing for budget endpoints
-func handleBudgetRoutes(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Path
-	
-	switch {
-	case path == "/api/v1/budgets":
-		switch r.Method {
-		case http.MethodGet:
-			api.GetAllBudgetsHandler(w, r)
-		case http.MethodPost:
-			api.CreateBudgetHandler(w, r)
-		default:
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case path == "/api/v1/budgets/active":
-		if r.Method == http.MethodGet {
-			api.GetActiveBudgetsHandler(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case path == "/api/v1/budgets/deleted":
-		if r.Method == http.MethodGet {
-			api.GetDeletedBudgetsHandler(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case path == "/api/v1/budgets/by-month":
-		if r.Method == http.MethodGet {
-			api.GetBudgetByMonthYearHandler(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case strings.HasPrefix(path, "/api/v1/budgets/") && strings.HasSuffix(path, "/restore"):
-		if r.Method == http.MethodPost {
-			api.RestoreBudgetHandler(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case strings.HasPrefix(path, "/api/v1/budgets/") && strings.HasSuffix(path, "/status"):
-		if r.Method == http.MethodPatch {
-			api.ChangeBudgetStatusHandler(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case strings.HasPrefix(path, "/api/v1/budgets/"):
-		switch r.Method {
-		case http.MethodGet:
-			api.GetBudgetByIDHandler(w, r)
-		case http.MethodPatch:
-			api.UpdateBudgetHandler(w, r)
-		case http.MethodDelete:
-			api.DeleteBudgetHandler(w, r)
-		default:
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	default:
-		http.Error(w, "Not found", http.StatusNotFound)
-	}
-}
 
 // handleBankAccountRoutes manages routing for bank account endpoints
 func handleBankAccountRoutes(w http.ResponseWriter, r *http.Request) {
@@ -353,6 +287,20 @@ func handleFixedExpenseRoutes(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
 	
+	case path == "/api/v1/fixed-expenses/calendar":
+		if r.Method == http.MethodGet {
+			api.GetFixedExpensesCalendarHandler(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
+	case path == "/api/v1/fixed-expenses/process":
+		if r.Method == http.MethodPost {
+			api.ProcessFixedExpensesHandler(w, r)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	
 	case strings.HasPrefix(path, "/api/v1/fixed-expenses/"):
 		switch r.Method {
 		case http.MethodGet:
@@ -370,64 +318,6 @@ func handleFixedExpenseRoutes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handleBudgetHistoryRoutes manages routing for budget history endpoints
-func handleBudgetHistoryRoutes(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Path
-	
-	switch {
-	case path == "/api/v1/budget-history":
-		if r.Method == http.MethodGet {
-			api.GetAllBudgetHistory(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case path == "/api/v1/budget-history/date-range":
-		if r.Method == http.MethodGet {
-			api.GetBudgetHistoryByDateRange(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case path == "/api/v1/budget-history/reasons":
-		if r.Method == http.MethodGet {
-			api.GetBudgetHistoryWithReasons(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case path == "/api/v1/budget-history/stats":
-		if r.Method == http.MethodGet {
-			api.GetBudgetHistoryStats(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case path == "/api/v1/budget-history/patterns":
-		if r.Method == http.MethodGet {
-			api.AnalyzeBudgetPatterns(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case strings.HasPrefix(path, "/api/v1/budgets/") && strings.HasSuffix(path, "/history"):
-		if r.Method == http.MethodGet {
-			api.GetBudgetHistoryByBudgetID(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case strings.HasPrefix(path, "/api/v1/budget-history/"):
-		if r.Method == http.MethodGet {
-			api.GetBudgetHistoryByID(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	default:
-		http.Error(w, "Not found", http.StatusNotFound)
-	}
-}
 
 // handleGoalRoutes manages routing for goal endpoints
 func handleGoalRoutes(w http.ResponseWriter, r *http.Request) {
@@ -650,51 +540,6 @@ func handleReminderRoutes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handleTransferRoutes manages routing for transfer endpoints
-func handleTransferRoutes(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Path
-	
-	switch {
-	case path == "/api/v1/transfers":
-		switch r.Method {
-		case http.MethodGet:
-			api.GetAllTransfersHandler(w, r)
-		case http.MethodPost:
-			api.CreateTransferHandler(w, r)
-		default:
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case path == "/api/v1/transfers/stats":
-		if r.Method == http.MethodGet {
-			api.GetTransferStatsHandler(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case strings.HasPrefix(path, "/api/v1/transfers/account/"):
-		if r.Method == http.MethodGet {
-			api.GetTransfersByAccountHandler(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	case strings.HasPrefix(path, "/api/v1/transfers/"):
-		switch r.Method {
-		case http.MethodGet:
-			api.GetTransferByIDHandler(w, r)
-		case http.MethodPatch:
-			api.UpdateTransferHandler(w, r)
-		case http.MethodDelete:
-			api.DeleteTransferHandler(w, r)
-		default:
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	
-	default:
-		http.Error(w, "Not found", http.StatusNotFound)
-	}
-}
 
 func main() {
 	// Load environment variables
@@ -774,9 +619,6 @@ func main() {
 	protectedMux.HandleFunc("/api/v1/reminders", handleReminderRoutes)
 	protectedMux.HandleFunc("/api/v1/reminders/", handleReminderRoutes)
 	
-	// Transfer endpoints - PROTECTED
-	protectedMux.HandleFunc("/api/v1/transfers", handleTransferRoutes)
-	protectedMux.HandleFunc("/api/v1/transfers/", handleTransferRoutes)
 	
 	// Apply auth middleware to protected API v1 routes
 	mux.Handle("/api/v1/protected/", auth.AuthMiddleware(protectedMux))
@@ -785,22 +627,16 @@ func main() {
 	mux.Handle("/api/v1/incomes/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/expenses", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/expenses/", auth.AuthMiddleware(protectedMux))
-	mux.Handle("/api/v1/budgets", auth.AuthMiddleware(protectedMux))
-	mux.Handle("/api/v1/budgets/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/bank-accounts", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/bank-accounts/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/fixed-expenses", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/fixed-expenses/", auth.AuthMiddleware(protectedMux))
-	mux.Handle("/api/v1/budget-history", auth.AuthMiddleware(protectedMux))
-	mux.Handle("/api/v1/budget-history/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/goals", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/goals/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/user-categories", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/user-categories/", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/reminders", auth.AuthMiddleware(protectedMux))
 	mux.Handle("/api/v1/reminders/", auth.AuthMiddleware(protectedMux))
-	mux.Handle("/api/v1/transfers", auth.AuthMiddleware(protectedMux))
-	mux.Handle("/api/v1/transfers/", auth.AuthMiddleware(protectedMux))
 
 	// Serve swagger.json file
 	mux.HandleFunc("/docs/swagger.json", func(w http.ResponseWriter, r *http.Request) {

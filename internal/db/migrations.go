@@ -170,6 +170,26 @@ func DropExpenseTypesTable(db *gorm.DB) error {
 	return nil
 }
 
+// DropBudgetTables removes budget and budget_history tables
+func DropBudgetTables(db *gorm.DB) error {
+	logger.Warn("⚠️  Dropping budget-related tables...")
+	
+	if err := db.Exec("DROP TABLE IF EXISTS budget_histories CASCADE").Error; err != nil {
+		return fmt.Errorf("error dropping budget_histories: %w", err)
+	}
+	
+	if err := db.Exec("DROP TABLE IF EXISTS budgets CASCADE").Error; err != nil {
+		return fmt.Errorf("error dropping budgets: %w", err)
+	}
+	
+	if err := db.Exec("DROP TABLE IF EXISTS transfers CASCADE").Error; err != nil {
+		return fmt.Errorf("error dropping transfers: %w", err)
+	}
+	
+	logger.Info("✅ Dropped budget and transfer tables")
+	return nil
+}
+
 // RunAllMigrations runs auto-migration for all models and custom migrations
 func RunAllMigrations(db *gorm.DB) error {
 	logger.Info("🔄 Running database migrations...")
@@ -193,7 +213,13 @@ func RunAllMigrations(db *gorm.DB) error {
 		return fmt.Errorf("error running ExpenseType migration: %w", err)
 	}
 
-	// Step 3: Optionally drop old expense_types table
+	// Step 4: Drop budget and transfer tables (removed functionality)
+	logger.Info("Dropping budget and transfer tables...")
+	if err := DropBudgetTables(db); err != nil {
+		logger.Warn("Warning dropping budget tables: %v", err)
+	}
+
+	// Step 5: Optionally drop old expense_types table
 	// Uncomment the lines below ONLY after verifying the migration worked correctly
 	// logger.Info("Dropping old expense_types table...")
 	// if err := DropExpenseTypesTable(db); err != nil {

@@ -11,10 +11,7 @@ func GetAllModels() []interface{} {
 		&Goal{},
 		&Expense{},
 		&Income{},
-		&Budget{},
-		&Transfer{},
 		&Reminder{},
-		&BudgetHistory{},
 		&RefreshToken{},
 	}
 }

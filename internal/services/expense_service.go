@@ -8,6 +8,7 @@ import (
 	"github.com/Osminalx/fluxio/internal/models"
 	"github.com/Osminalx/fluxio/pkg/utils/logger"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // CreateExpense creates a new expense for the user
@@ -39,10 +40,22 @@ func CreateExpense(userID string, expense *models.Expense) error {
 		return errors.New("expense amount must be positive")
 	}
 	
+	// Check balance (warning only, allow negative)
+	if bankAccount.Balance < expense.Amount {
+		logger.Warn("Expense will result in negative balance for account %s", bankAccount.ID)
+	}
+	
 	result = db.DB.Create(expense)
 	if result.Error != nil {
 		logger.Error("Error creating expense: %v", result.Error)
 		return result.Error
+	}
+	
+	// Update bank account balance (deduct expense amount)
+	if err := db.DB.Model(&bankAccount).
+		Update("balance", gorm.Expr("balance - ?", expense.Amount)).Error; err != nil {
+		logger.Error("Error updating bank account balance: %v", err)
+		return errors.New("error updating bank account balance")
 	}
 	
 	logger.Info("Expense created successfully: %+v", expense)
@@ -220,6 +233,41 @@ func PatchExpense(userID string, id string, expense *models.Expense) (*models.Ex
 		return nil, errors.New("expense amount must be positive")
 	}
 	
+	// If amount changed, adjust bank account balance
+	if existingExpense.Amount != expense.Amount {
+		var bankAccount models.BankAccount
+		if err := db.DB.Where("id = ?", existingExpense.BankAccountID).First(&bankAccount).Error; err != nil {
+			return nil, errors.New("bank account not found")
+		}
+		
+		// Reverse old expense and apply new expense
+		balanceChange := existingExpense.Amount - expense.Amount
+		if err := db.DB.Model(&bankAccount).
+			Update("balance", gorm.Expr("balance + ?", balanceChange)).Error; err != nil {
+			return nil, errors.New("error updating bank account balance")
+		}
+	}
+	
+	// If bank account changed, move amounts between accounts
+	if existingExpense.BankAccountID != expense.BankAccountID {
+		// Add back to old account
+		if err := db.DB.Model(&models.BankAccount{}).Where("id = ?", existingExpense.BankAccountID).
+			Update("balance", gorm.Expr("balance + ?", existingExpense.Amount)).Error; err != nil {
+			return nil, errors.New("error updating old bank account")
+		}
+		
+		// Deduct from new account
+		var newAccount models.BankAccount
+		if err := db.DB.Where("id = ?", expense.BankAccountID).First(&newAccount).Error; err != nil {
+			return nil, errors.New("new bank account not found")
+		}
+		
+		if err := db.DB.Model(&newAccount).
+			Update("balance", gorm.Expr("balance - ?", expense.Amount)).Error; err != nil {
+			return nil, errors.New("error updating new bank account")
+		}
+	}
+	
 	// Prevenir modificación de campos protegidos
 	expense.UserID = existingExpense.UserID
 	expense.ID = existingExpense.ID
@@ -270,6 +318,13 @@ func SoftDeleteExpense(userID string, id string) error {
 		return result.Error
 	}
 	
+	// Restore amount to bank account
+	if err := db.DB.Model(&models.BankAccount{}).Where("id = ?", existingExpense.BankAccountID).
+		Update("balance", gorm.Expr("balance + ?", existingExpense.Amount)).Error; err != nil {
+		logger.Error("Error restoring balance: %v", err)
+		return errors.New("error restoring bank account balance")
+	}
+	
 	logger.Info("Expense soft deleted successfully: %s", id)
 	return nil
 }
@@ -310,6 +365,13 @@ func RestoreExpense(userID string, id string) (*models.Expense, error) {
 	if result.Error != nil {
 		logger.Error("Error restoring expense: %v", result.Error)
 		return nil, result.Error
+	}
+	
+	// Deduct amount from bank account again
+	if err := db.DB.Model(&models.BankAccount{}).Where("id = ?", existingExpense.BankAccountID).
+		Update("balance", gorm.Expr("balance - ?", existingExpense.Amount)).Error; err != nil {
+		logger.Error("Error deducting balance: %v", err)
+		return nil, errors.New("error updating bank account balance")
 	}
 	
 	// Get the updated expense with all relationships
@@ -534,70 +596,6 @@ func GetExpensesByExpenseType(userID string, startDate, endDate time.Time) (map[
 	return expensesByType, nil
 }
 
-// ValidateMonthlyBudgetCompliance validates if user is within budget for a month
-func ValidateMonthlyBudgetCompliance(userID string, year int, month int) (map[string]interface{}, error) {
-	var compliance map[string]interface{}
-	compliance = make(map[string]interface{})
-	
-	// Obtener el presupuesto del mes
-	monthYear := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
-	budget, err := GetActiveBudgetByMonthYear(userID, monthYear)
-	if err != nil {
-		logger.Error("No active budget found for %d-%02d", year, month)
-		return nil, errors.New("no active budget found for this month")
-	}
-	
-	// Obtener gastos reales del mes
-	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
-	endDate := startDate.AddDate(0, 1, -1)
-	
-	expensesByType, err := GetExpensesByExpenseType(userID, startDate, endDate)
-	if err != nil {
-		return nil, err
-	}
-	
-	// Calcular compliance para cada tipo
-	needsSpent := expensesByType["Needs"]
-	wantsSpent := expensesByType["Wants"]
-	savingsSpent := expensesByType["Savings"]
-	
-	compliance["budget"] = map[string]interface{}{
-		"needs_budget":   budget.NeedsBudget,
-		"wants_budget":   budget.WantsBudget,
-		"savings_budget": budget.SavingsBudget,
-	}
-	
-	compliance["actual"] = map[string]interface{}{
-		"needs_spent":   needsSpent,
-		"wants_spent":   wantsSpent,
-		"savings_spent": savingsSpent,
-	}
-	
-	compliance["compliance"] = map[string]interface{}{
-		"needs_compliance":   ((budget.NeedsBudget - needsSpent) / budget.NeedsBudget) * 100,
-		"wants_compliance":   ((budget.WantsBudget - wantsSpent) / budget.WantsBudget) * 100,
-		"savings_compliance": ((budget.SavingsBudget - savingsSpent) / budget.SavingsBudget) * 100,
-	}
-	
-	compliance["status"] = map[string]interface{}{
-		"needs_over_budget":   needsSpent > budget.NeedsBudget,
-		"wants_over_budget":   wantsSpent > budget.WantsBudget,
-		"savings_under_goal":  savingsSpent < budget.SavingsBudget,
-	}
-	
-	totalBudget := budget.NeedsBudget + budget.WantsBudget + budget.SavingsBudget
-	totalSpent := needsSpent + wantsSpent + savingsSpent
-	
-	compliance["overall"] = map[string]interface{}{
-		"total_budget":     totalBudget,
-		"total_spent":      totalSpent,
-		"remaining_budget": totalBudget - totalSpent,
-		"budget_used_pct":  (totalSpent / totalBudget) * 100,
-	}
-	
-	logger.Info("Budget compliance calculated successfully for user %s", userID)
-	return compliance, nil
-}
 
 // GetSpendingTrends gets spending trends over time for the user
 func GetSpendingTrends(userID string, months int) (map[string]interface{}, error) {

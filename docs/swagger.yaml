@@ -152,7 +152,7 @@ definitions:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
       month_year:
-        example: "2024-01-01"
+        example: 2024-01
         type: string
       needs_budget:
         example: 2500
@@ -224,7 +224,7 @@ definitions:
   api.CreateBudgetRequest:
     properties:
       month_year:
-        example: "2024-01-01"
+        example: 2024-01
         type: string
       needs_budget:
         example: 2500
@@ -259,11 +259,22 @@ definitions:
       amount:
         example: 1200
         type: number
+      category_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
       due_date:
+        description: Day of month for recurring expenses
         example: "2024-01-15"
         type: string
+      is_recurring:
+        example: true
+        type: boolean
       name:
         example: Monthly Rent
+        type: string
+      recurrence_type:
+        description: monthly, yearly
+        example: monthly
         type: string
     type: object
   api.CreateGoalRequest:
@@ -469,6 +480,9 @@ definitions:
       amount:
         example: 1200
         type: number
+      category_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
       created_at:
         example: "2024-01-15T10:30:00Z"
         type: string
@@ -478,8 +492,14 @@ definitions:
       id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
+      is_recurring:
+        example: true
+        type: boolean
       name:
         example: Monthly Rent
+        type: string
+      recurrence_type:
+        example: monthly
         type: string
       status:
         example: active
@@ -672,11 +692,20 @@ definitions:
       amount:
         example: 1300
         type: number
+      category_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
       due_date:
         example: "2024-01-20"
         type: string
+      is_recurring:
+        example: true
+        type: boolean
       name:
         example: Updated Rent
+        type: string
+      recurrence_type:
+        example: monthly
         type: string
     type: object
   api.UpdateGoalRequest:
@@ -2000,7 +2029,7 @@ paths:
       - application/json
       description: Gets the budget for the authenticated user for a specific month/year
       parameters:
-      - description: Month year (YYYY-MM-DD, first day of month)
+      - description: Month year (YYYY-MM or YYYY-MM-DD)
         in: query
         name: month_year
         required: true
@@ -2770,6 +2799,46 @@ paths:
       security:
       - bearerAuth: []
       summary: Update a fixed expense
+      tags:
+      - fixed_expense
+  /api/v1/fixed-expenses/calendar:
+    get:
+      consumes:
+      - application/json
+      description: Returns all fixed expenses that apply to a specific month/year
+      parameters:
+      - description: Year (e.g., 2024)
+        in: query
+        name: year
+        required: true
+        type: integer
+      - description: Month (1-12)
+        in: query
+        name: month
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.FixedExpensesListResponse'
+        "400":
+          description: Invalid parameters
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - bearerAuth: []
+      summary: Get fixed expenses calendar for a specific month
       tags:
       - fixed_expense
   /api/v1/goals:

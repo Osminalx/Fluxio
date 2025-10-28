@@ -8,6 +8,7 @@ import (
 	"github.com/Osminalx/fluxio/internal/models"
 	"github.com/Osminalx/fluxio/pkg/utils/logger"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 func CreateIncome(userID string, income *models.Income) error {
@@ -15,11 +16,34 @@ func CreateIncome(userID string, income *models.Income) error {
 	income.UserID = uuid.MustParse(userID)
 	income.Status = models.StatusActive
 	
-	result := db.DB.Create(income)
+	// Verify that the bank account exists, is active and belongs to the user
+	var bankAccount models.BankAccount
+	result := db.DB.Where("id = ? AND user_id = ? AND status IN ?", 
+		income.BankAccountID, userID, models.GetActiveStatuses()).First(&bankAccount)
+	if result.Error != nil {
+		logger.Error("Bank account not found, not active, or doesn't belong to user")
+		return errors.New("bank account not found, not active, or access denied")
+	}
+	
+	// Verify that the amount is positive
+	if income.Amount <= 0 {
+		logger.Error("Income amount must be positive")
+		return errors.New("income amount must be positive")
+	}
+	
+	result = db.DB.Create(income)
 	if result.Error != nil{
 		logger.Error("Error creating income: %v", result.Error)
 		return result.Error
 	}
+	
+	// Add income to bank account balance
+	if err := db.DB.Model(&bankAccount).
+		Update("balance", gorm.Expr("balance + ?", income.Amount)).Error; err != nil {
+		logger.Error("Error updating bank account balance: %v", err)
+		return errors.New("error updating bank account balance")
+	}
+	
 	logger.Info("Income created successfully: %+v", income)
 	return nil
 }

@@ -1266,7 +1266,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Month year (YYYY-MM-DD, first day of month)",
+                        "description": "Month year (YYYY-MM or YYYY-MM-DD)",
                         "name": "month_year",
                         "in": "query",
                         "required": true
@@ -2632,6 +2632,68 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid request body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/fixed-expenses/calendar": {
+            "get": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Returns all fixed expenses that apply to a specific month/year",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "fixed_expense"
+                ],
+                "summary": "Get fixed expenses calendar for a specific month",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Year (e.g., 2024)",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Month (1-12)",
+                        "name": "month",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.FixedExpensesListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid parameters",
                         "schema": {
                             "type": "string"
                         }
@@ -5621,7 +5683,7 @@ const docTemplate = `{
                 },
                 "month_year": {
                     "type": "string",
-                    "example": "2024-01-01"
+                    "example": "2024-01"
                 },
                 "needs_budget": {
                     "type": "number",
@@ -5724,7 +5786,7 @@ const docTemplate = `{
             "properties": {
                 "month_year": {
                     "type": "string",
-                    "example": "2024-01-01"
+                    "example": "2024-01"
                 },
                 "needs_budget": {
                     "type": "number",
@@ -5772,13 +5834,27 @@ const docTemplate = `{
                     "type": "number",
                     "example": 1200
                 },
+                "category_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
                 "due_date": {
+                    "description": "Day of month for recurring expenses",
                     "type": "string",
                     "example": "2024-01-15"
+                },
+                "is_recurring": {
+                    "type": "boolean",
+                    "example": true
                 },
                 "name": {
                     "type": "string",
                     "example": "Monthly Rent"
+                },
+                "recurrence_type": {
+                    "description": "monthly, yearly",
+                    "type": "string",
+                    "example": "monthly"
                 }
             }
         },
@@ -6069,6 +6145,10 @@ const docTemplate = `{
                     "type": "number",
                     "example": 1200
                 },
+                "category_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
                 "created_at": {
                     "type": "string",
                     "example": "2024-01-15T10:30:00Z"
@@ -6081,9 +6161,17 @@ const docTemplate = `{
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
+                "is_recurring": {
+                    "type": "boolean",
+                    "example": true
+                },
                 "name": {
                     "type": "string",
                     "example": "Monthly Rent"
+                },
+                "recurrence_type": {
+                    "type": "string",
+                    "example": "monthly"
                 },
                 "status": {
                     "type": "string",
@@ -6358,13 +6446,25 @@ const docTemplate = `{
                     "type": "number",
                     "example": 1300
                 },
+                "category_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
                 "due_date": {
                     "type": "string",
                     "example": "2024-01-20"
                 },
+                "is_recurring": {
+                    "type": "boolean",
+                    "example": true
+                },
                 "name": {
                     "type": "string",
                     "example": "Updated Rent"
+                },
+                "recurrence_type": {
+                    "type": "string",
+                    "example": "monthly"
                 }
             }
         },
