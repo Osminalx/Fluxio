@@ -820,912 +820,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/budget-history": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get all budget history entries for the user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Get all budget history",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/budget-history/date-range": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get budget history entries within a specific date range",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Get budget history by date range",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Start date (YYYY-MM-DD)",
-                        "name": "start_date",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "End date (YYYY-MM-DD)",
-                        "name": "end_date",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Date parameters are required or invalid",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/budget-history/patterns": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Analyze patterns in budget changes for machine learning insights",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Analyze budget patterns",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Number of months to analyze",
-                        "name": "months",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryPatternsResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid months parameter",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/budget-history/reasons": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get budget history entries filtered by change reason",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Get budget history with reasons filter",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Change reason filter",
-                        "name": "reason",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Reason filter is required",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/budget-history/stats": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get statistical information about budget history",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Get budget history statistics",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryStatsResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/budget-history/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get a specific budget history entry by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Get budget history by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Budget History ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Budget history ID is required",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Budget history not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/budgets": {
-            "get": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Gets all budgets for the authenticated user with option to include deleted",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "budget"
-                ],
-                "summary": "Get all budgets",
-                "parameters": [
-                    {
-                        "type": "boolean",
-                        "description": "Include deleted budgets",
-                        "name": "include_deleted",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetsListResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Creates a new budget for the authenticated user for a specific month/year",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "budget"
-                ],
-                "summary": "Create a new budget",
-                "parameters": [
-                    {
-                        "description": "Budget data",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api.CreateBudgetRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "409": {
-                        "description": "Budget already exists for this month/year",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/budgets/active": {
-            "get": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Gets all active budgets for the authenticated user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "budget"
-                ],
-                "summary": "Get active budgets",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetsListResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/budgets/by-month": {
-            "get": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Gets the budget for the authenticated user for a specific month/year",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "budget"
-                ],
-                "summary": "Get a budget by month/year",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Month year (YYYY-MM or YYYY-MM-DD)",
-                        "name": "month_year",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid month_year parameter",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Budget not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/budgets/deleted": {
-            "get": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Gets all deleted budgets for the authenticated user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "budget"
-                ],
-                "summary": "Get deleted budgets",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetsListResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/budgets/{budget_id}/history": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get all history entries for a specific budget",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Budget History"
-                ],
-                "summary": "Get budget history by budget ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Budget ID",
-                        "name": "budget_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetHistoryListResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Budget ID is required",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/budgets/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Gets a specific budget for the authenticated user by their ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "budget"
-                ],
-                "summary": "Get a budget by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Budget ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Budget not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Marks a budget as deleted without permanently deleting it",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "budget"
-                ],
-                "summary": "Delete a budget (soft delete)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Budget ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Budget not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Updates partially a budget for the authenticated user (creates history entry)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "budget"
-                ],
-                "summary": "Update a budget",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Budget ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Data to update",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api.UpdateBudgetRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Budget not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/budgets/{id}/restore": {
-            "post": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Restores a previously deleted budget (soft delete)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "budget"
-                ],
-                "summary": "Restore a deleted budget",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Budget ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Budget not found or not deleted",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "409": {
-                        "description": "Another active budget exists for this month/year",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/budgets/{id}/status": {
-            "patch": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Changes the status of a budget (active, inactive, deleted, etc.)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "budget"
-                ],
-                "summary": "Change the status of a budget",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Budget ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "New status",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api.ChangeStatusRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.BudgetResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Budget not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "409": {
-                        "description": "Another active budget exists for this month/year",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/expenses": {
             "get": {
                 "security": [
@@ -2708,6 +1802,35 @@ const docTemplate = `{
                         "description": "Internal server error",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/fixed-expenses/process": {
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "description": "Processes all fixed expenses that are due and creates expense records",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "fixed_expense"
+                ],
+                "summary": "Process due fixed expenses (scheduled job)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -4462,458 +3585,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/transfers": {
-            "get": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Retrieves all transfers for the authenticated user with optional filtering",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "transfers"
-                ],
-                "summary": "Get all transfers for user",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Limit results",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Offset for pagination",
-                        "name": "offset",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter by account ID (source or destination)",
-                        "name": "account_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter from date (YYYY-MM-DD)",
-                        "name": "from_date",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter to date (YYYY-MM-DD)",
-                        "name": "to_date",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Transfer"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Creates a new transfer between bank accounts for the authenticated user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "transfers"
-                ],
-                "summary": "Create a new transfer",
-                "parameters": [
-                    {
-                        "description": "Transfer data",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api.CreateTransferRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.Transfer"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/transfers/account/{account_id}": {
-            "get": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Retrieves all transfers for a specific bank account",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "transfers"
-                ],
-                "summary": "Get transfers by account",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bank Account ID",
-                        "name": "account_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Limit results",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Offset for pagination",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Transfer"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid account ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/transfers/stats": {
-            "get": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Retrieves transfer statistics for the authenticated user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "transfers"
-                ],
-                "summary": "Get transfer statistics",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Filter by account ID",
-                        "name": "account_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter from date (YYYY-MM-DD)",
-                        "name": "from_date",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Filter to date (YYYY-MM-DD)",
-                        "name": "to_date",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/transfers/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Retrieves a specific transfer by ID for the authenticated user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "transfers"
-                ],
-                "summary": "Get transfer by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Transfer ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Transfer"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid transfer ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Transfer not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Soft deletes a transfer for the authenticated user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "transfers"
-                ],
-                "summary": "Delete transfer",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Transfer ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid transfer ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Transfer not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ],
-                "description": "Updates a transfer for the authenticated user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "transfers"
-                ],
-                "summary": "Update transfer",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Transfer ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Update data",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api.UpdateTransferRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Transfer"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Transfer not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/user-categories": {
             "get": {
                 "security": [
@@ -5490,6 +4161,10 @@ const docTemplate = `{
                     "type": "number",
                     "example": 2500
                 },
+                "committed_fixed_expenses_month": {
+                    "type": "number",
+                    "example": 1200
+                },
                 "created_at": {
                     "type": "string",
                     "example": "2024-01-15T10:30:00Z"
@@ -5497,6 +4172,10 @@ const docTemplate = `{
                 "id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "real_balance": {
+                    "type": "number",
+                    "example": 1300
                 },
                 "status": {
                     "type": "string",
@@ -5541,192 +4220,6 @@ const docTemplate = `{
                 "count": {
                     "type": "integer",
                     "example": 3
-                }
-            }
-        },
-        "api.BudgetHistoryListResponse": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "type": "integer",
-                    "example": 10
-                },
-                "history": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/api.BudgetHistoryResponse"
-                    }
-                }
-            }
-        },
-        "api.BudgetHistoryPatternsResponse": {
-            "type": "object",
-            "properties": {
-                "analyzed_changes_count": {
-                    "type": "integer",
-                    "example": 15
-                },
-                "analyzed_period_months": {
-                    "type": "integer",
-                    "example": 12
-                },
-                "change_frequency_seconds": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    },
-                    "example": [
-                        86400,
-                        172800,
-                        604800
-                    ]
-                },
-                "needs_changes": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    }
-                },
-                "savings_changes": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    }
-                },
-                "wants_changes": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    }
-                }
-            }
-        },
-        "api.BudgetHistoryResponse": {
-            "type": "object",
-            "properties": {
-                "budget_id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "change_reason": {
-                    "type": "string",
-                    "example": "Salary increase"
-                },
-                "changed_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "new_needs_budget": {
-                    "type": "number",
-                    "example": 2700
-                },
-                "new_savings_budget": {
-                    "type": "number",
-                    "example": 1200
-                },
-                "new_wants_budget": {
-                    "type": "number",
-                    "example": 1300
-                },
-                "old_needs_budget": {
-                    "type": "number",
-                    "example": 2500
-                },
-                "old_savings_budget": {
-                    "type": "number",
-                    "example": 1000
-                },
-                "old_wants_budget": {
-                    "type": "number",
-                    "example": 1500
-                }
-            }
-        },
-        "api.BudgetHistoryStatsResponse": {
-            "type": "object",
-            "properties": {
-                "first_change_date": {
-                    "type": "string",
-                    "example": "2024-01-01T00:00:00Z"
-                },
-                "last_change_date": {
-                    "type": "string",
-                    "example": "2024-12-15T10:30:00Z"
-                },
-                "monthly_changes": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "additionalProperties": true
-                    }
-                },
-                "total_changes": {
-                    "type": "integer",
-                    "example": 25
-                }
-            }
-        },
-        "api.BudgetResponse": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "123e4567-e89b-12d3-a456-426614174000"
-                },
-                "month_year": {
-                    "type": "string",
-                    "example": "2024-01"
-                },
-                "needs_budget": {
-                    "type": "number",
-                    "example": 2500
-                },
-                "savings_budget": {
-                    "type": "number",
-                    "example": 1000
-                },
-                "status": {
-                    "type": "string",
-                    "example": "active"
-                },
-                "status_changed_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                },
-                "total_budget": {
-                    "type": "number",
-                    "example": 5000
-                },
-                "updated_at": {
-                    "type": "string",
-                    "example": "2024-01-15T10:30:00Z"
-                },
-                "wants_budget": {
-                    "type": "number",
-                    "example": 1500
-                }
-            }
-        },
-        "api.BudgetsListResponse": {
-            "type": "object",
-            "properties": {
-                "budgets": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/api.BudgetResponse"
-                    }
-                },
-                "count": {
-                    "type": "integer",
-                    "example": 5
                 }
             }
         },
@@ -5781,27 +4274,6 @@ const docTemplate = `{
                 }
             }
         },
-        "api.CreateBudgetRequest": {
-            "type": "object",
-            "properties": {
-                "month_year": {
-                    "type": "string",
-                    "example": "2024-01"
-                },
-                "needs_budget": {
-                    "type": "number",
-                    "example": 2500
-                },
-                "savings_budget": {
-                    "type": "number",
-                    "example": 1000
-                },
-                "wants_budget": {
-                    "type": "number",
-                    "example": 1500
-                }
-            }
-        },
         "api.CreateExpenseRequest": {
             "type": "object",
             "properties": {
@@ -5833,6 +4305,10 @@ const docTemplate = `{
                 "amount": {
                     "type": "number",
                     "example": 1200
+                },
+                "bank_account_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
                 "category_id": {
                     "type": "string",
@@ -5882,6 +4358,10 @@ const docTemplate = `{
                     "type": "number",
                     "example": 2500.5
                 },
+                "bank_account_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
                 "date": {
                     "type": "string",
                     "example": "2024-01-15"
@@ -5914,32 +4394,6 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 200,
                     "minLength": 1
-                }
-            }
-        },
-        "api.CreateTransferRequest": {
-            "type": "object",
-            "required": [
-                "amount",
-                "date",
-                "from_account_id",
-                "to_account_id"
-            ],
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "date": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "from_account_id": {
-                    "type": "string"
-                },
-                "to_account_id": {
-                    "type": "string"
                 }
             }
         },
@@ -6145,6 +4599,10 @@ const docTemplate = `{
                     "type": "number",
                     "example": 1200
                 },
+                "bank_account_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
                 "category_id": {
                     "type": "string",
                     "example": "123e4567-e89b-12d3-a456-426614174000"
@@ -6168,6 +4626,10 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "Monthly Rent"
+                },
+                "next_due_date": {
+                    "type": "string",
+                    "example": "2024-02-15"
                 },
                 "recurrence_type": {
                     "type": "string",
@@ -6273,6 +4735,14 @@ const docTemplate = `{
                 "amount": {
                     "type": "number",
                     "example": 2500.5
+                },
+                "bank_account_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
+                "bank_account_name": {
+                    "type": "string",
+                    "example": "Main Account"
                 },
                 "created_at": {
                     "type": "string",
@@ -6393,27 +4863,6 @@ const docTemplate = `{
                 }
             }
         },
-        "api.UpdateBudgetRequest": {
-            "type": "object",
-            "properties": {
-                "change_reason": {
-                    "type": "string",
-                    "example": "Salary increase"
-                },
-                "needs_budget": {
-                    "type": "number",
-                    "example": 2700
-                },
-                "savings_budget": {
-                    "type": "number",
-                    "example": 1200
-                },
-                "wants_budget": {
-                    "type": "number",
-                    "example": 1300
-                }
-            }
-        },
         "api.UpdateExpenseRequest": {
             "type": "object",
             "properties": {
@@ -6445,6 +4894,10 @@ const docTemplate = `{
                 "amount": {
                     "type": "number",
                     "example": 1300
+                },
+                "bank_account_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
                 },
                 "category_id": {
                     "type": "string",
@@ -6492,6 +4945,10 @@ const docTemplate = `{
                     "type": "number",
                     "example": 2800.75
                 },
+                "bank_account_id": {
+                    "type": "string",
+                    "example": "123e4567-e89b-12d3-a456-426614174000"
+                },
                 "date": {
                     "type": "string",
                     "example": "2024-01-16"
@@ -6514,20 +4971,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "api.UpdateTransferRequest": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "date": {
-                    "type": "string"
-                },
-                "description": {
                     "type": "string"
                 }
             }
@@ -6670,43 +5113,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.BankAccount": {
-            "type": "object",
-            "properties": {
-                "account_name": {
-                    "type": "string"
-                },
-                "balance": {
-                    "type": "number"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/models.Status"
-                },
-                "status_changed_at": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user": {
-                    "description": "Relaciones",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    ]
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
         "models.Reminder": {
             "type": "object",
             "properties": {
@@ -6771,58 +5177,6 @@ const docTemplate = `{
                 "StatusPending",
                 "StatusLocked"
             ]
-        },
-        "models.Transfer": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "date": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "from_account": {
-                    "$ref": "#/definitions/models.BankAccount"
-                },
-                "from_account_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/models.Status"
-                },
-                "status_changed_at": {
-                    "type": "string"
-                },
-                "to_account": {
-                    "$ref": "#/definitions/models.BankAccount"
-                },
-                "to_account_id": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "user": {
-                    "description": "Relaciones",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    ]
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
         },
         "models.User": {
             "type": "object",

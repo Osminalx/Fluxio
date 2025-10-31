@@ -592,8 +592,8 @@ func main() {
 	protectedMux.HandleFunc("/api/v1/expenses/", handleExpenseRoutes)
 	
 	// Budget endpoints - PROTECTED
-	protectedMux.HandleFunc("/api/v1/budgets", handleBudgetRoutes)
-	protectedMux.HandleFunc("/api/v1/budgets/", handleBudgetRoutes)
+	// protectedMux.HandleFunc("/api/v1/budgets", handleBudgetRoutes)
+	// protectedMux.HandleFunc("/api/v1/budgets/", handleBudgetRoutes)
 	
 	// Bank Account endpoints - PROTECTED
 	protectedMux.HandleFunc("/api/v1/bank-accounts", handleBankAccountRoutes)
@@ -604,8 +604,8 @@ func main() {
 	protectedMux.HandleFunc("/api/v1/fixed-expenses/", handleFixedExpenseRoutes)
 	
 	// Budget History endpoints - PROTECTED
-	protectedMux.HandleFunc("/api/v1/budget-history", handleBudgetHistoryRoutes)
-	protectedMux.HandleFunc("/api/v1/budget-history/", handleBudgetHistoryRoutes)
+	// protectedMux.HandleFunc("/api/v1/budget-history", handleBudgetHistoryRoutes)
+	// protectedMux.HandleFunc("/api/v1/budget-history/", handleBudgetHistoryRoutes)
 	
 	// Goal endpoints - PROTECTED
 	protectedMux.HandleFunc("/api/v1/goals", handleGoalRoutes)

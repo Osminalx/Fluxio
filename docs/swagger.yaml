@@ -16,12 +16,18 @@ definitions:
       balance:
         example: 2500
         type: number
+      committed_fixed_expenses_month:
+        example: 1200
+        type: number
       created_at:
         example: "2024-01-15T10:30:00Z"
         type: string
       id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
+      real_balance:
+        example: 1300
+        type: number
       status:
         example: active
         type: string
@@ -52,138 +58,6 @@ definitions:
         type: array
       count:
         example: 3
-        type: integer
-    type: object
-  api.BudgetHistoryListResponse:
-    properties:
-      count:
-        example: 10
-        type: integer
-      history:
-        items:
-          $ref: '#/definitions/api.BudgetHistoryResponse'
-        type: array
-    type: object
-  api.BudgetHistoryPatternsResponse:
-    properties:
-      analyzed_changes_count:
-        example: 15
-        type: integer
-      analyzed_period_months:
-        example: 12
-        type: integer
-      change_frequency_seconds:
-        example:
-        - 86400
-        - 172800
-        - 604800
-        items:
-          type: integer
-        type: array
-      needs_changes:
-        items:
-          type: number
-        type: array
-      savings_changes:
-        items:
-          type: number
-        type: array
-      wants_changes:
-        items:
-          type: number
-        type: array
-    type: object
-  api.BudgetHistoryResponse:
-    properties:
-      budget_id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      change_reason:
-        example: Salary increase
-        type: string
-      changed_at:
-        example: "2024-01-15T10:30:00Z"
-        type: string
-      id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      new_needs_budget:
-        example: 2700
-        type: number
-      new_savings_budget:
-        example: 1200
-        type: number
-      new_wants_budget:
-        example: 1300
-        type: number
-      old_needs_budget:
-        example: 2500
-        type: number
-      old_savings_budget:
-        example: 1000
-        type: number
-      old_wants_budget:
-        example: 1500
-        type: number
-    type: object
-  api.BudgetHistoryStatsResponse:
-    properties:
-      first_change_date:
-        example: "2024-01-01T00:00:00Z"
-        type: string
-      last_change_date:
-        example: "2024-12-15T10:30:00Z"
-        type: string
-      monthly_changes:
-        items:
-          additionalProperties: true
-          type: object
-        type: array
-      total_changes:
-        example: 25
-        type: integer
-    type: object
-  api.BudgetResponse:
-    properties:
-      created_at:
-        example: "2024-01-15T10:30:00Z"
-        type: string
-      id:
-        example: 123e4567-e89b-12d3-a456-426614174000
-        type: string
-      month_year:
-        example: 2024-01
-        type: string
-      needs_budget:
-        example: 2500
-        type: number
-      savings_budget:
-        example: 1000
-        type: number
-      status:
-        example: active
-        type: string
-      status_changed_at:
-        example: "2024-01-15T10:30:00Z"
-        type: string
-      total_budget:
-        example: 5000
-        type: number
-      updated_at:
-        example: "2024-01-15T10:30:00Z"
-        type: string
-      wants_budget:
-        example: 1500
-        type: number
-    type: object
-  api.BudgetsListResponse:
-    properties:
-      budgets:
-        items:
-          $ref: '#/definitions/api.BudgetResponse'
-        type: array
-      count:
-        example: 5
         type: integer
     type: object
   api.CategoryResponse:
@@ -221,21 +95,6 @@ definitions:
         example: 2500
         type: number
     type: object
-  api.CreateBudgetRequest:
-    properties:
-      month_year:
-        example: 2024-01
-        type: string
-      needs_budget:
-        example: 2500
-        type: number
-      savings_budget:
-        example: 1000
-        type: number
-      wants_budget:
-        example: 1500
-        type: number
-    type: object
   api.CreateExpenseRequest:
     properties:
       amount:
@@ -259,6 +118,9 @@ definitions:
       amount:
         example: 1200
         type: number
+      bank_account_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
       category_id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
@@ -294,6 +156,9 @@ definitions:
       amount:
         example: 2500.5
         type: number
+      bank_account_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
       date:
         example: "2024-01-15"
         type: string
@@ -318,24 +183,6 @@ definitions:
     - due_date
     - reminder_type
     - title
-    type: object
-  api.CreateTransferRequest:
-    properties:
-      amount:
-        type: number
-      date:
-        type: string
-      description:
-        type: string
-      from_account_id:
-        type: string
-      to_account_id:
-        type: string
-    required:
-    - amount
-    - date
-    - from_account_id
-    - to_account_id
     type: object
   api.CreateUserCategoryRequest:
     properties:
@@ -480,6 +327,9 @@ definitions:
       amount:
         example: 1200
         type: number
+      bank_account_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
       category_id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
@@ -497,6 +347,9 @@ definitions:
         type: boolean
       name:
         example: Monthly Rent
+        type: string
+      next_due_date:
+        example: "2024-02-15"
         type: string
       recurrence_type:
         example: monthly
@@ -572,6 +425,12 @@ definitions:
       amount:
         example: 2500.5
         type: number
+      bank_account_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      bank_account_name:
+        example: Main Account
+        type: string
       created_at:
         example: "2024-01-15T10:30:00Z"
         type: string
@@ -654,21 +513,6 @@ definitions:
         example: 3000
         type: number
     type: object
-  api.UpdateBudgetRequest:
-    properties:
-      change_reason:
-        example: Salary increase
-        type: string
-      needs_budget:
-        example: 2700
-        type: number
-      savings_budget:
-        example: 1200
-        type: number
-      wants_budget:
-        example: 1300
-        type: number
-    type: object
   api.UpdateExpenseRequest:
     properties:
       amount:
@@ -692,6 +536,9 @@ definitions:
       amount:
         example: 1300
         type: number
+      bank_account_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
       category_id:
         example: 123e4567-e89b-12d3-a456-426614174000
         type: string
@@ -725,6 +572,9 @@ definitions:
       amount:
         example: 2800.75
         type: number
+      bank_account_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
       date:
         example: "2024-01-16"
         type: string
@@ -740,15 +590,6 @@ definitions:
       reminder_type:
         type: string
       title:
-        type: string
-    type: object
-  api.UpdateTransferRequest:
-    properties:
-      amount:
-        type: number
-      date:
-        type: string
-      description:
         type: string
     type: object
   api.UpdateUserCategoryRequest:
@@ -849,29 +690,6 @@ definitions:
         example: "2023-12-01T00:00:00Z"
         type: string
     type: object
-  models.BankAccount:
-    properties:
-      account_name:
-        type: string
-      balance:
-        type: number
-      created_at:
-        type: string
-      id:
-        type: string
-      status:
-        $ref: '#/definitions/models.Status'
-      status_changed_at:
-        type: string
-      updated_at:
-        type: string
-      user:
-        allOf:
-        - $ref: '#/definitions/models.User'
-        description: Relaciones
-      user_id:
-        type: string
-    type: object
   models.Reminder:
     properties:
       created_at:
@@ -917,39 +735,6 @@ definitions:
     - StatusArchived
     - StatusPending
     - StatusLocked
-  models.Transfer:
-    properties:
-      amount:
-        type: number
-      created_at:
-        type: string
-      date:
-        type: string
-      description:
-        type: string
-      from_account:
-        $ref: '#/definitions/models.BankAccount'
-      from_account_id:
-        type: string
-      id:
-        type: string
-      status:
-        $ref: '#/definitions/models.Status'
-      status_changed_at:
-        type: string
-      to_account:
-        $ref: '#/definitions/models.BankAccount'
-      to_account_id:
-        type: string
-      updated_at:
-        type: string
-      user:
-        allOf:
-        - $ref: '#/definitions/models.User'
-        description: Relaciones
-      user_id:
-        type: string
-    type: object
   models.User:
     properties:
       created_at:
@@ -1508,585 +1293,6 @@ paths:
       summary: Get deleted bank accounts
       tags:
       - bank_account
-  /api/v1/budget-history:
-    get:
-      consumes:
-      - application/json
-      description: Get all budget history entries for the user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryListResponse'
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Get all budget history
-      tags:
-      - Budget History
-  /api/v1/budget-history/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Get a specific budget history entry by ID
-      parameters:
-      - description: Budget History ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryResponse'
-        "400":
-          description: Budget history ID is required
-          schema:
-            type: string
-        "404":
-          description: Budget history not found
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Get budget history by ID
-      tags:
-      - Budget History
-  /api/v1/budget-history/date-range:
-    get:
-      consumes:
-      - application/json
-      description: Get budget history entries within a specific date range
-      parameters:
-      - description: Start date (YYYY-MM-DD)
-        in: query
-        name: start_date
-        required: true
-        type: string
-      - description: End date (YYYY-MM-DD)
-        in: query
-        name: end_date
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryListResponse'
-        "400":
-          description: Date parameters are required or invalid
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Get budget history by date range
-      tags:
-      - Budget History
-  /api/v1/budget-history/patterns:
-    get:
-      consumes:
-      - application/json
-      description: Analyze patterns in budget changes for machine learning insights
-      parameters:
-      - description: Number of months to analyze
-        in: query
-        name: months
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryPatternsResponse'
-        "400":
-          description: Invalid months parameter
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Analyze budget patterns
-      tags:
-      - Budget History
-  /api/v1/budget-history/reasons:
-    get:
-      consumes:
-      - application/json
-      description: Get budget history entries filtered by change reason
-      parameters:
-      - description: Change reason filter
-        in: query
-        name: reason
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryListResponse'
-        "400":
-          description: Reason filter is required
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Get budget history with reasons filter
-      tags:
-      - Budget History
-  /api/v1/budget-history/stats:
-    get:
-      consumes:
-      - application/json
-      description: Get statistical information about budget history
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryStatsResponse'
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Get budget history statistics
-      tags:
-      - Budget History
-  /api/v1/budgets:
-    get:
-      consumes:
-      - application/json
-      description: Gets all budgets for the authenticated user with option to include
-        deleted
-      parameters:
-      - description: Include deleted budgets
-        in: query
-        name: include_deleted
-        type: boolean
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetsListResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Get all budgets
-      tags:
-      - budget
-    post:
-      consumes:
-      - application/json
-      description: Creates a new budget for the authenticated user for a specific
-        month/year
-      parameters:
-      - description: Budget data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/api.CreateBudgetRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/api.BudgetResponse'
-        "400":
-          description: Invalid request body
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "409":
-          description: Budget already exists for this month/year
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Create a new budget
-      tags:
-      - budget
-  /api/v1/budgets/{budget_id}/history:
-    get:
-      consumes:
-      - application/json
-      description: Get all history entries for a specific budget
-      parameters:
-      - description: Budget ID
-        in: path
-        name: budget_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetHistoryListResponse'
-        "400":
-          description: Budget ID is required
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Get budget history by budget ID
-      tags:
-      - Budget History
-  /api/v1/budgets/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Marks a budget as deleted without permanently deleting it
-      parameters:
-      - description: Budget ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetResponse'
-        "400":
-          description: Invalid ID
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "404":
-          description: Budget not found
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Delete a budget (soft delete)
-      tags:
-      - budget
-    get:
-      consumes:
-      - application/json
-      description: Gets a specific budget for the authenticated user by their ID
-      parameters:
-      - description: Budget ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetResponse'
-        "400":
-          description: Invalid ID
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "404":
-          description: Budget not found
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Get a budget by ID
-      tags:
-      - budget
-    patch:
-      consumes:
-      - application/json
-      description: Updates partially a budget for the authenticated user (creates
-        history entry)
-      parameters:
-      - description: Budget ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Data to update
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/api.UpdateBudgetRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetResponse'
-        "400":
-          description: Invalid request body
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "404":
-          description: Budget not found
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Update a budget
-      tags:
-      - budget
-  /api/v1/budgets/{id}/restore:
-    post:
-      consumes:
-      - application/json
-      description: Restores a previously deleted budget (soft delete)
-      parameters:
-      - description: Budget ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetResponse'
-        "400":
-          description: Invalid ID
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "404":
-          description: Budget not found or not deleted
-          schema:
-            type: string
-        "409":
-          description: Another active budget exists for this month/year
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Restore a deleted budget
-      tags:
-      - budget
-  /api/v1/budgets/{id}/status:
-    patch:
-      consumes:
-      - application/json
-      description: Changes the status of a budget (active, inactive, deleted, etc.)
-      parameters:
-      - description: Budget ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: New status
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/api.ChangeStatusRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetResponse'
-        "400":
-          description: Invalid request body
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "404":
-          description: Budget not found
-          schema:
-            type: string
-        "409":
-          description: Another active budget exists for this month/year
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Change the status of a budget
-      tags:
-      - budget
-  /api/v1/budgets/active:
-    get:
-      consumes:
-      - application/json
-      description: Gets all active budgets for the authenticated user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetsListResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Get active budgets
-      tags:
-      - budget
-  /api/v1/budgets/by-month:
-    get:
-      consumes:
-      - application/json
-      description: Gets the budget for the authenticated user for a specific month/year
-      parameters:
-      - description: Month year (YYYY-MM or YYYY-MM-DD)
-        in: query
-        name: month_year
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetResponse'
-        "400":
-          description: Invalid month_year parameter
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "404":
-          description: Budget not found
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Get a budget by month/year
-      tags:
-      - budget
-  /api/v1/budgets/deleted:
-    get:
-      consumes:
-      - application/json
-      description: Gets all deleted budgets for the authenticated user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/api.BudgetsListResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Get deleted budgets
-      tags:
-      - budget
   /api/v1/expenses:
     get:
       consumes:
@@ -2839,6 +2045,24 @@ paths:
       security:
       - bearerAuth: []
       summary: Get fixed expenses calendar for a specific month
+      tags:
+      - fixed_expense
+  /api/v1/fixed-expenses/process:
+    post:
+      consumes:
+      - application/json
+      description: Processes all fixed expenses that are due and creates expense records
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - bearerAuth: []
+      summary: Process due fixed expenses (scheduled job)
       tags:
       - fixed_expense
   /api/v1/goals:
@@ -3842,298 +3066,6 @@ paths:
       summary: Setup new user
       tags:
       - System Setup
-  /api/v1/transfers:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves all transfers for the authenticated user with optional
-        filtering
-      parameters:
-      - description: Limit results
-        in: query
-        name: limit
-        type: integer
-      - description: Offset for pagination
-        in: query
-        name: offset
-        type: integer
-      - description: Filter by account ID (source or destination)
-        in: query
-        name: account_id
-        type: string
-      - description: Filter from date (YYYY-MM-DD)
-        in: query
-        name: from_date
-        type: string
-      - description: Filter to date (YYYY-MM-DD)
-        in: query
-        name: to_date
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Transfer'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Get all transfers for user
-      tags:
-      - transfers
-    post:
-      consumes:
-      - application/json
-      description: Creates a new transfer between bank accounts for the authenticated
-        user
-      parameters:
-      - description: Transfer data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/api.CreateTransferRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.Transfer'
-        "400":
-          description: Invalid request body
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Create a new transfer
-      tags:
-      - transfers
-  /api/v1/transfers/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Soft deletes a transfer for the authenticated user
-      parameters:
-      - description: Transfer ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Invalid transfer ID
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "404":
-          description: Transfer not found
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Delete transfer
-      tags:
-      - transfers
-    get:
-      consumes:
-      - application/json
-      description: Retrieves a specific transfer by ID for the authenticated user
-      parameters:
-      - description: Transfer ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Transfer'
-        "400":
-          description: Invalid transfer ID
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "404":
-          description: Transfer not found
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Get transfer by ID
-      tags:
-      - transfers
-    patch:
-      consumes:
-      - application/json
-      description: Updates a transfer for the authenticated user
-      parameters:
-      - description: Transfer ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Update data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/api.UpdateTransferRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Transfer'
-        "400":
-          description: Invalid request
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "404":
-          description: Transfer not found
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Update transfer
-      tags:
-      - transfers
-  /api/v1/transfers/account/{account_id}:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves all transfers for a specific bank account
-      parameters:
-      - description: Bank Account ID
-        in: path
-        name: account_id
-        required: true
-        type: string
-      - description: Limit results
-        in: query
-        name: limit
-        type: integer
-      - description: Offset for pagination
-        in: query
-        name: offset
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Transfer'
-            type: array
-        "400":
-          description: Invalid account ID
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Get transfers by account
-      tags:
-      - transfers
-  /api/v1/transfers/stats:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves transfer statistics for the authenticated user
-      parameters:
-      - description: Filter by account ID
-        in: query
-        name: account_id
-        type: string
-      - description: Filter from date (YYYY-MM-DD)
-        in: query
-        name: from_date
-        type: string
-      - description: Filter to date (YYYY-MM-DD)
-        in: query
-        name: to_date
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      security:
-      - bearerAuth: []
-      summary: Get transfer statistics
-      tags:
-      - transfers
   /api/v1/user-categories:
     get:
       consumes:

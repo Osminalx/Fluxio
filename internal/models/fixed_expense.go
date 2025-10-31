@@ -13,7 +13,7 @@ type FixedExpense struct {
 	Amount          float64    `json:"amount" gorm:"type:decimal(15,2);not null"`
 	DueDate         time.Time  `json:"due_date" gorm:"type:date;not null"` // Day of month (1-31)
 	CategoryID      *uuid.UUID `json:"category_id" gorm:"type:uuid"`       // Optional category to classify as needs/wants/savings
-	BankAccountID   uuid.UUID  `json:"bank_account_id" gorm:"type:uuid;not null"`
+	BankAccountID   uuid.UUID  `json:"bank_account_id" gorm:"type:uuid"`   // Note: nullable for migration, validation in service layer ensures NOT NULL
 	IsRecurring     bool       `json:"is_recurring" gorm:"default:true"`   // Whether it repeats monthly
 	RecurrenceType  string     `json:"recurrence_type" gorm:"type:varchar(20);default:'monthly'"` // monthly, yearly
 	Status          Status     `json:"status" gorm:"type:varchar(20);not null;default:'active'"`
@@ -21,7 +21,7 @@ type FixedExpense struct {
 	CreatedAt       time.Time  `json:"created_at"`
 	UpdatedAt       time.Time  `json:"updated_at"`
 	LastProcessedAt *time.Time `json:"last_processed_at,omitempty"` // Last time it was auto-deducted
-	NextDueDate     time.Time  `json:"next_due_date" gorm:"type:date;not null"` // Next scheduled deduction
+	NextDueDate     time.Time  `json:"next_due_date" gorm:"type:date"` // Next scheduled deduction (nullable for migration)
 
 	// Relaciones
 	User        User        `json:"user" gorm:"foreignKey:UserID;references:ID"`

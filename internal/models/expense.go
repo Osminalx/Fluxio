@@ -12,7 +12,7 @@ type Expense struct {
 	CategoryID      uuid.UUID  `json:"category_id" gorm:"type:uuid;not null"`
 	Amount          float64    `json:"amount" gorm:"type:decimal(15,2);not null"`
 	Date            time.Time  `json:"date" gorm:"type:date;not null"`
-	BankAccountID   uuid.UUID  `json:"bank_account_id" gorm:"type:uuid;not null"`
+	BankAccountID   uuid.UUID  `json:"bank_account_id" gorm:"type:uuid"` // Note: nullable for migration, validation in service layer ensures NOT NULL
 	Description     *string    `json:"description"`
 	Status          Status     `json:"status" gorm:"type:varchar(20);not null;default:'active'"`
 	StatusChangedAt *time.Time `json:"status_changed_at,omitempty"`

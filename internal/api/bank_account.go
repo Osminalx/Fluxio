@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+    "time"
 
 	"github.com/Osminalx/fluxio/internal/models"
 	"github.com/Osminalx/fluxio/internal/services"
@@ -25,6 +26,8 @@ type BankAccountFullResponse struct {
 	ID              string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
 	AccountName     string  `json:"account_name" example:"Main Checking Account"`
 	Balance         float64 `json:"balance" example:"2500.00"`
+    CommittedFixedExpensesMonth float64 `json:"committed_fixed_expenses_month" example:"1200.00"`
+    RealBalance     float64 `json:"real_balance" example:"1300.00"`
 	Status          string  `json:"status" example:"active"`
 	StatusChangedAt *string `json:"status_changed_at,omitempty" example:"2024-01-15T10:30:00Z"`
 	CreatedAt       string  `json:"created_at" example:"2024-01-15T10:30:00Z"`
@@ -42,6 +45,8 @@ func convertBankAccountToResponse(bankAccount *models.BankAccount) BankAccountFu
 		ID:          bankAccount.ID.String(),
 		AccountName: bankAccount.AccountName,
 		Balance:     bankAccount.Balance,
+        CommittedFixedExpensesMonth: 0,
+        RealBalance: 0,
 		Status:      string(bankAccount.Status),
 		CreatedAt:   bankAccount.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:   bankAccount.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
@@ -112,8 +117,14 @@ func CreateBankAccountHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert to response
-	response := convertBankAccountToResponse(bankAccount)
+    // Convert to response and compute committed/real balance for current month
+    response := convertBankAccountToResponse(bankAccount)
+    now := time.Now().UTC()
+    committed, err := services.GetCommittedFixedExpensesForAccount(userID, bankAccount.ID.String(), now.Year(), now.Month())
+    if err == nil {
+        response.CommittedFixedExpensesMonth = committed
+        response.RealBalance = response.Balance - committed
+    }
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -161,7 +172,13 @@ func GetBankAccountByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := convertBankAccountToResponse(bankAccount)
+    response := convertBankAccountToResponse(bankAccount)
+    now := time.Now().UTC()
+    committed, err := services.GetCommittedFixedExpensesForAccount(userID, bankAccount.ID.String(), now.Year(), now.Month())
+    if err == nil {
+        response.CommittedFixedExpensesMonth = committed
+        response.RealBalance = response.Balance - committed
+    }
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
@@ -202,11 +219,18 @@ func GetAllBankAccountsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert to response
-	bankAccountResponses := make([]BankAccountFullResponse, len(bankAccounts))
-	for i, bankAccount := range bankAccounts {
-		bankAccountResponses[i] = convertBankAccountToResponse(&bankAccount)
-	}
+    // Convert to response and compute per-account committed/real
+    bankAccountResponses := make([]BankAccountFullResponse, len(bankAccounts))
+    now := time.Now().UTC()
+    for i, bankAccount := range bankAccounts {
+        resp := convertBankAccountToResponse(&bankAccount)
+        committed, err := services.GetCommittedFixedExpensesForAccount(userID, bankAccount.ID.String(), now.Year(), now.Month())
+        if err == nil {
+            resp.CommittedFixedExpensesMonth = committed
+            resp.RealBalance = resp.Balance - committed
+        }
+        bankAccountResponses[i] = resp
+    }
 
 	response := BankAccountsListResponse{
 		BankAccounts: bankAccountResponses,
@@ -247,10 +271,17 @@ func GetActiveBankAccountsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bankAccountResponses := make([]BankAccountFullResponse, len(bankAccounts))
-	for i := range bankAccounts {
-		bankAccountResponses[i] = convertBankAccountToResponse(&bankAccounts[i])
-	}
+    bankAccountResponses := make([]BankAccountFullResponse, len(bankAccounts))
+    now := time.Now().UTC()
+    for i := range bankAccounts {
+        resp := convertBankAccountToResponse(&bankAccounts[i])
+        committed, err := services.GetCommittedFixedExpensesForAccount(userID, bankAccounts[i].ID.String(), now.Year(), now.Month())
+        if err == nil {
+            resp.CommittedFixedExpensesMonth = committed
+            resp.RealBalance = resp.Balance - committed
+        }
+        bankAccountResponses[i] = resp
+    }
 
 	response := BankAccountsListResponse{
 		BankAccounts: bankAccountResponses,
@@ -291,10 +322,17 @@ func GetDeletedBankAccountsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bankAccountResponses := make([]BankAccountFullResponse, len(bankAccounts))
-	for i := range bankAccounts {
-		bankAccountResponses[i] = convertBankAccountToResponse(&bankAccounts[i])
-	}
+    bankAccountResponses := make([]BankAccountFullResponse, len(bankAccounts))
+    now := time.Now().UTC()
+    for i := range bankAccounts {
+        resp := convertBankAccountToResponse(&bankAccounts[i])
+        committed, err := services.GetCommittedFixedExpensesForAccount(userID, bankAccounts[i].ID.String(), now.Year(), now.Month())
+        if err == nil {
+            resp.CommittedFixedExpensesMonth = committed
+            resp.RealBalance = resp.Balance - committed
+        }
+        bankAccountResponses[i] = resp
+    }
 
 	response := BankAccountsListResponse{
 		BankAccounts: bankAccountResponses,
@@ -388,7 +426,13 @@ func UpdateBankAccountHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := convertBankAccountToResponse(updatedBankAccount)
+    response := convertBankAccountToResponse(updatedBankAccount)
+    now := time.Now().UTC()
+    committed, err := services.GetCommittedFixedExpensesForAccount(userID, updatedBankAccount.ID.String(), now.Year(), now.Month())
+    if err == nil {
+        response.CommittedFixedExpensesMonth = committed
+        response.RealBalance = response.Balance - committed
+    }
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
@@ -483,6 +527,12 @@ func RestoreBankAccountHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := convertBankAccountToResponse(restoredAccount)
+    now := time.Now().UTC()
+    committed, err := services.GetCommittedFixedExpensesForAccount(userID, restoredAccount.ID.String(), now.Year(), now.Month())
+    if err == nil {
+        response.CommittedFixedExpensesMonth = committed
+        response.RealBalance = response.Balance - committed
+    }
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
@@ -556,7 +606,13 @@ func ChangeBankAccountStatusHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := convertBankAccountToResponse(updatedBankAccount)
+    response := convertBankAccountToResponse(updatedBankAccount)
+    now := time.Now().UTC()
+    committed, err := services.GetCommittedFixedExpensesForAccount(userID, updatedBankAccount.ID.String(), now.Year(), now.Month())
+    if err == nil {
+        response.CommittedFixedExpensesMonth = committed
+        response.RealBalance = response.Balance - committed
+    }
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

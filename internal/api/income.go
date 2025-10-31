@@ -25,14 +25,15 @@ type UpdateIncomeRequest struct {
 }
 
 type IncomeResponse struct {
-	ID              string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Amount          float64 `json:"amount" example:"2500.50"`
-	BankAccountID   string  `json:"bank_account_id" example:"123e4567-e89b-12d3-a456-426614174000"`
-	Date            string  `json:"date" example:"2024-01-15"`
-	Status          string  `json:"status" example:"active"`
-	StatusChangedAt *string `json:"status_changed_at,omitempty" example:"2024-01-15T10:30:00Z"`
-	CreatedAt       string  `json:"created_at" example:"2024-01-15T10:30:00Z"`
-	UpdatedAt       string  `json:"updated_at" example:"2024-01-15T10:30:00Z"`
+    ID                string  `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
+    Amount            float64 `json:"amount" example:"2500.50"`
+    BankAccountID     string  `json:"bank_account_id" example:"123e4567-e89b-12d3-a456-426614174000"`
+    BankAccountName   string  `json:"bank_account_name" example:"Main Account"`
+    Date              string  `json:"date" example:"2024-01-15"`
+    Status            string  `json:"status" example:"active"`
+    StatusChangedAt   *string `json:"status_changed_at,omitempty" example:"2024-01-15T10:30:00Z"`
+    CreatedAt         string  `json:"created_at" example:"2024-01-15T10:30:00Z"`
+    UpdatedAt         string  `json:"updated_at" example:"2024-01-15T10:30:00Z"`
 }
 
 type IncomesListResponse struct {
@@ -42,22 +43,27 @@ type IncomesListResponse struct {
 
 // Helper function to convert model to response
 func convertIncomeToResponse(income *models.Income) IncomeResponse {
-	response := IncomeResponse{
-		ID:            income.ID.String(),
-		Amount:        income.Amount,
-		BankAccountID: income.BankAccountID.String(),
-		Date:          income.Date.Format("2006-01-02"),
-		Status:        string(income.Status),
-		CreatedAt:     income.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:     income.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
-	}
-	
-	if income.StatusChangedAt != nil {
-		statusChangedAt := income.StatusChangedAt.Format("2006-01-02T15:04:05Z07:00")
-		response.StatusChangedAt = &statusChangedAt
-	}
-	
-	return response
+    response := IncomeResponse{
+        ID:              income.ID.String(),
+        Amount:          income.Amount,
+        BankAccountID:   income.BankAccountID.String(),
+        BankAccountName: "",
+        Date:            income.Date.Format("2006-01-02"),
+        Status:          string(income.Status),
+        CreatedAt:       income.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+        UpdatedAt:       income.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+    }
+
+    if income.BankAccount.AccountName != "" {
+        response.BankAccountName = income.BankAccount.AccountName
+    }
+    
+    if income.StatusChangedAt != nil {
+        statusChangedAt := income.StatusChangedAt.Format("2006-01-02T15:04:05Z07:00")
+        response.StatusChangedAt = &statusChangedAt
+    }
+    
+    return response
 }
 
 // CreateIncomeHandler godoc
@@ -130,15 +136,23 @@ func CreateIncomeHandler(w http.ResponseWriter, r *http.Request) {
 		income.Date = date
 	}
 
-	// Create in the database
-	if err := services.CreateIncome(userID, income); err != nil {
+    // Create in the database
+    if err := services.CreateIncome(userID, income); err != nil {
 		logger.Error("Error creating income: %v", err)
 		http.Error(w, "Error creating income", http.StatusInternalServerError)
 		return
 	}
 
-	// Convert to response
-	response := convertIncomeToResponse(income)
+    // Reload with relations so we can return bank account name
+    createdIncome, err := services.GetIncomeByID(userID, income.ID.String())
+    if err != nil {
+        logger.Error("Error retrieving created income: %v", err)
+        http.Error(w, "Error retrieving income", http.StatusInternalServerError)
+        return
+    }
+
+    // Convert to response
+    response := convertIncomeToResponse(createdIncome)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)

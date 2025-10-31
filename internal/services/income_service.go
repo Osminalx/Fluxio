@@ -16,7 +16,13 @@ func CreateIncome(userID string, income *models.Income) error {
 	income.UserID = uuid.MustParse(userID)
 	income.Status = models.StatusActive
 	
-	// Verify that the bank account exists, is active and belongs to the user
+	// Validate and verify that the bank account exists, is active and belongs to the user
+	var zeroUUID uuid.UUID
+	if income.BankAccountID == zeroUUID {
+		logger.Error("Bank account ID is required")
+		return errors.New("bank account ID is required")
+	}
+	
 	var bankAccount models.BankAccount
 	result := db.DB.Where("id = ? AND user_id = ? AND status IN ?", 
 		income.BankAccountID, userID, models.GetActiveStatuses()).First(&bankAccount)
@@ -49,8 +55,10 @@ func CreateIncome(userID string, income *models.Income) error {
 }
 
 func GetIncomeByID(userID string, id string) (*models.Income, error) {
-	var income models.Income
-	result := db.DB.Where("user_id = ? AND id = ? AND status IN ?", userID, id, models.GetVisibleStatuses()).First(&income)
+    var income models.Income
+    result := db.DB.Where("user_id = ? AND id = ? AND status IN ?", userID, id, models.GetVisibleStatuses()).
+        Preload("BankAccount").
+        First(&income)
 	if result.Error != nil{
 		logger.Error("Error getting income by id: %v", result.Error)
 		return nil, result.Error
@@ -61,7 +69,7 @@ func GetIncomeByID(userID string, id string) (*models.Income, error) {
 
 func GetAllIncomes(userID string, includeDeleted bool) ([]models.Income, error) {
 	var incomes []models.Income
-	query := db.DB.Where("user_id = ?", userID)
+    query := db.DB.Where("user_id = ?", userID).Preload("BankAccount")
 	
 	if !includeDeleted {
 		query = query.Where("status IN ?", models.GetVisibleStatuses())
@@ -78,8 +86,9 @@ func GetAllIncomes(userID string, includeDeleted bool) ([]models.Income, error) 
 
 func GetActiveIncomes(userID string) ([]models.Income, error) {
 	var incomes []models.Income
-	result := db.DB.Where("user_id = ? AND status IN ?", userID, models.GetActiveStatuses()).
-		Order("date DESC, created_at DESC").Find(&incomes)
+    result := db.DB.Where("user_id = ? AND status IN ?", userID, models.GetActiveStatuses()).
+        Preload("BankAccount").
+        Order("date DESC, created_at DESC").Find(&incomes)
 	if result.Error != nil{
 		logger.Error("Error getting active incomes: %v", result.Error)
 		return nil, result.Error
@@ -90,8 +99,9 @@ func GetActiveIncomes(userID string) ([]models.Income, error) {
 
 func GetDeletedIncomes(userID string) ([]models.Income, error) {
 	var incomes []models.Income
-	result := db.DB.Where("user_id = ? AND status = ?", userID, models.StatusDeleted).
-		Order("status_changed_at DESC").Find(&incomes)
+    result := db.DB.Where("user_id = ? AND status = ?", userID, models.StatusDeleted).
+        Preload("BankAccount").
+        Order("status_changed_at DESC").Find(&incomes)
 	if result.Error != nil{
 		logger.Error("Error getting deleted incomes: %v", result.Error)
 		return nil, result.Error
@@ -131,8 +141,10 @@ func PatchIncome(userID string, id string, income *models.Income) (*models.Incom
 		return nil, errors.New("income not found or access denied")
 	}
 	
-	// Obtener el income actualizado
-	result = db.DB.Where("user_id = ? AND id = ?", userID, id).First(&existingIncome)
+    // Obtener el income actualizado con relaciones
+    result = db.DB.Where("user_id = ? AND id = ?", userID, id).
+        Preload("BankAccount").
+        First(&existingIncome)
 	if result.Error != nil {
 		logger.Error("Error retrieving updated income: %v", result.Error)
 		return nil, result.Error

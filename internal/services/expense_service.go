@@ -25,7 +25,13 @@ func CreateExpense(userID string, expense *models.Expense) error {
 		return errors.New("category not found or not active")
 	}
 	
-	// Verify that the bank account exists, is active and belongs to the user
+	// Validate and verify that the bank account exists, is active and belongs to the user
+	var zeroUUID uuid.UUID
+	if expense.BankAccountID == zeroUUID {
+		logger.Error("Bank account ID is required")
+		return errors.New("bank account ID is required")
+	}
+	
 	var bankAccount models.BankAccount
 	result = db.DB.Where("id = ? AND user_id = ? AND status IN ?", 
 		expense.BankAccountID, userID, models.GetActiveStatuses()).First(&bankAccount)

@@ -19,7 +19,13 @@ func CreateFixedExpense(userID string,fixedExpense models.FixedExpense)(*models.
 	fixedExpense.CreatedAt = time.Now()
 	fixedExpense.UpdatedAt = time.Now()
 
-	// Verify bank account exists and belongs to user
+	// Validate and verify bank account exists and belongs to user
+	var zeroUUID uuid.UUID
+	if fixedExpense.BankAccountID == zeroUUID {
+		logger.Error("Bank account ID is required")
+		return nil, errors.New("bank account ID is required")
+	}
+	
 	var bankAccount models.BankAccount
 	result := db.DB.Where("id = ? AND user_id = ? AND status IN ?", 
 		fixedExpense.BankAccountID, userID, models.GetActiveStatuses()).First(&bankAccount)
@@ -67,6 +73,30 @@ func GetFixedExpenses(userID string,includeDeleted bool)([]models.FixedExpense,e
 	}
 
 	return fixedExpenses,nil
+}
+
+// GetCommittedFixedExpensesForAccount returns the total amount of active fixed expenses
+// that are due for the specified year and month for a given bank account.
+// This does not modify balances; it only computes a committed amount for UI/UX.
+func GetCommittedFixedExpensesForAccount(userID string, bankAccountID string, year int, month time.Month) (float64, error) {
+    var fixedExpenses []models.FixedExpense
+
+    // Query only active fixed expenses for this user and account (exclude NULL bank_account_id)
+    result := db.DB.Where("user_id = ? AND bank_account_id = ? AND status = ? AND bank_account_id IS NOT NULL",
+        userID, bankAccountID, models.StatusActive).Find(&fixedExpenses)
+    if result.Error != nil {
+        logger.Error("Error querying fixed expenses for committed calculation: %v", result.Error)
+        return 0, result.Error
+    }
+
+    total := 0.0
+    for _, fx := range fixedExpenses {
+        if fx.ShouldApplyForMonth(year, month) {
+            total += fx.Amount
+        }
+    }
+
+    return total, nil
 }
 
 func UpdateFixedExpense(userID string,id string,fixedExpense models.FixedExpense)(*models.FixedExpense,error){
