@@ -120,6 +120,85 @@ func PatchIncome(userID string, id string, income *models.Income) (*models.Incom
 		return nil, errors.New("income not found or access denied")
 	}
 	
+	// Determine which fields are being updated
+	// Note: If field is zero value, it means it wasn't provided in the request
+	var zeroUUID uuid.UUID
+	amountProvided := income.Amount != 0
+	bankAccountProvided := income.BankAccountID != zeroUUID
+	
+	amountChanged := amountProvided && income.Amount != existingIncome.Amount
+	bankAccountChanged := bankAccountProvided && income.BankAccountID != existingIncome.BankAccountID
+	
+	// Validate and verify bank account if provided
+	if bankAccountProvided {
+		var bankAccount models.BankAccount
+		result := db.DB.Where("id = ? AND user_id = ? AND status IN ?", 
+			income.BankAccountID, userID, models.GetActiveStatuses()).First(&bankAccount)
+		if result.Error != nil {
+			logger.Error("Bank account not found, not active, or doesn't belong to user")
+			return nil, errors.New("bank account not found, not active, or access denied")
+		}
+	}
+	
+	// Handle balance updates before updating the income record
+	if amountChanged || bankAccountChanged {
+		// Determine the final values to use
+		finalAmount := existingIncome.Amount
+		finalBankAccountID := existingIncome.BankAccountID
+		
+		if amountProvided {
+			finalAmount = income.Amount
+		}
+		if bankAccountProvided {
+			finalBankAccountID = income.BankAccountID
+		}
+		
+		// If only amount changed on same account
+		if amountChanged && !bankAccountChanged {
+			var bankAccount models.BankAccount
+			if err := db.DB.Where("id = ?", existingIncome.BankAccountID).First(&bankAccount).Error; err != nil {
+				return nil, errors.New("bank account not found")
+			}
+			
+			// Adjust balance: reverse old amount, apply new amount
+			balanceChange := finalAmount - existingIncome.Amount
+			if err := db.DB.Model(&bankAccount).
+				Update("balance", gorm.Expr("balance + ?", balanceChange)).Error; err != nil {
+				logger.Error("Error updating bank account balance: %v", err)
+				return nil, errors.New("error updating bank account balance")
+			}
+		} else if bankAccountChanged {
+			// Bank account changed - move amount between accounts
+			// Remove from old account (reverse the addition)
+			if err := db.DB.Model(&models.BankAccount{}).Where("id = ?", existingIncome.BankAccountID).
+				Update("balance", gorm.Expr("balance - ?", existingIncome.Amount)).Error; err != nil {
+				logger.Error("Error updating old bank account balance: %v", err)
+				return nil, errors.New("error updating old bank account balance")
+			}
+			
+			// Add to new account
+			var newAccount models.BankAccount
+			if err := db.DB.Where("id = ?", finalBankAccountID).First(&newAccount).Error; err != nil {
+				return nil, errors.New("new bank account not found")
+			}
+			
+			if err := db.DB.Model(&newAccount).
+				Update("balance", gorm.Expr("balance + ?", finalAmount)).Error; err != nil {
+				logger.Error("Error updating new bank account balance: %v", err)
+				return nil, errors.New("error updating new bank account balance")
+			}
+		}
+	}
+	
+	// If amount is zero, it means it wasn't provided, so keep existing amount
+	if !amountProvided {
+		income.Amount = existingIncome.Amount
+	}
+	// If bank account is zero, it means it wasn't provided, so keep existing bank account
+	if !bankAccountProvided {
+		income.BankAccountID = existingIncome.BankAccountID
+	}
+	
 	// Prevenir modificación de campos protegidos
 	income.UserID = existingIncome.UserID
 	income.ID = existingIncome.ID
@@ -175,6 +254,16 @@ func SoftDeleteIncome(userID string, id string) error {
 		return result.Error
 	}
 	
+	// Restore balance (remove the income amount from bank account)
+	var zeroUUID uuid.UUID
+	if existingIncome.BankAccountID != zeroUUID {
+		if err := db.DB.Model(&models.BankAccount{}).Where("id = ?", existingIncome.BankAccountID).
+			Update("balance", gorm.Expr("balance - ?", existingIncome.Amount)).Error; err != nil {
+			logger.Error("Error restoring bank account balance: %v", err)
+			return errors.New("error restoring bank account balance")
+		}
+	}
+	
 	logger.Info("Income soft deleted successfully: %s", id)
 	return nil
 }
@@ -188,6 +277,18 @@ func RestoreIncome(userID string, id string) (*models.Income, error) {
 		return nil, errors.New("income not found, not deleted, or access denied")
 	}
 	
+	// Verify that the bank account still exists and is active
+	var zeroUUID uuid.UUID
+	if existingIncome.BankAccountID != zeroUUID {
+		var bankAccount models.BankAccount
+		result := db.DB.Where("id = ? AND user_id = ? AND status IN ?", 
+			existingIncome.BankAccountID, userID, models.GetActiveStatuses()).First(&bankAccount)
+		if result.Error != nil {
+			logger.Error("Cannot restore income: bank account is not active")
+			return nil, errors.New("cannot restore income: bank account is not active")
+		}
+	}
+	
 	// Restaurar como activo
 	now := time.Now()
 	result = db.DB.Model(&existingIncome).Updates(map[string]interface{}{
@@ -198,6 +299,15 @@ func RestoreIncome(userID string, id string) (*models.Income, error) {
 	if result.Error != nil{
 		logger.Error("Error restoring income: %v", result.Error)
 		return nil, result.Error
+	}
+	
+	// Add balance back (add the income amount to bank account)
+	if existingIncome.BankAccountID != zeroUUID {
+		if err := db.DB.Model(&models.BankAccount{}).Where("id = ?", existingIncome.BankAccountID).
+			Update("balance", gorm.Expr("balance + ?", existingIncome.Amount)).Error; err != nil {
+			logger.Error("Error updating bank account balance: %v", err)
+			return nil, errors.New("error updating bank account balance")
+		}
 	}
 	
 	// Get the updated income

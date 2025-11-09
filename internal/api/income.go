@@ -404,6 +404,20 @@ func UpdateIncomeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if req.BankAccountID != nil {
+		if *req.BankAccountID == "" {
+			http.Error(w, "Bank account ID cannot be empty", http.StatusBadRequest)
+			return
+		}
+		// Parse bank account ID
+		bankAccountID, err := uuid.Parse(*req.BankAccountID)
+		if err != nil {
+			http.Error(w, "Invalid bank account ID format", http.StatusBadRequest)
+			return
+		}
+		income.BankAccountID = bankAccountID
+	}
+
 	// Update in the database
 	updatedIncome, err := services.PatchIncome(userID, id, income)
 	if err != nil {
